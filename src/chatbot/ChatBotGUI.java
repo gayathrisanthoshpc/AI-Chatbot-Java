@@ -10,29 +10,41 @@ public class ChatBotGUI {
         JFrame frame = new JFrame("AI ChatBot");
         JTextArea chatArea = new JTextArea();
         JTextField inputField = new JTextField();
+
         JButton sendButton = new JButton("Send");
+        JButton clearButton = new JButton("Clear");
 
         chatArea.setEditable(false);
         JScrollPane scroll = new JScrollPane(chatArea);
 
+        // Send button action
         sendButton.addActionListener(e -> {
-            String text = inputField.getText();
-            chatArea.append("You: " + text + "\n");
-            chatArea.append("Bot: Hello! You said \"" + text + "\"\n\n");
-            inputField.setText("");
+            String text = inputField.getText().trim();
+            if (!text.isEmpty()) {
+                chatArea.append("You: " + text + "\n");
+                chatArea.append("Bot: " + SmartChatBot.getReply(text) + "\n\n");
+                inputField.setText("");
+            }
         });
+
+        // Clear button action
+        clearButton.addActionListener(e -> chatArea.setText(""));
 
         frame.setLayout(new BorderLayout());
         frame.add(scroll, BorderLayout.CENTER);
 
-        JPanel bottom = new JPanel(new BorderLayout());
-        bottom.add(inputField, BorderLayout.CENTER);
-        bottom.add(sendButton, BorderLayout.EAST);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(inputField, BorderLayout.CENTER);
 
-        frame.add(bottom, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(clearButton);
+        buttonPanel.add(sendButton);
 
-        frame.setSize(400, 500);
-        frame.setVisible(true);
+        bottomPanel.add(buttonPanel, BorderLayout.EAST);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        frame.setSize(450, 550);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 }
