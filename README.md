@@ -11,6 +11,10 @@ It includes a console-based chatbot, a smart chatbot with basic memory, and a GU
 - GUI chatbot using Java Swing
 - Clean and modular project structure
 - Git & GitHub version control support
+-  User name memory
+- Time-aware responses
+- Smart GUI chatbot
+
 
 
 ## 🛠 Technologies Used
