@@ -3,6 +3,7 @@ package chatbot.ui;
 import chatbot.model.Message;
 import chatbot.service.ChatService;
 import chatbot.service.SmartChatBot;
+import chatbot.intelligence.*;
 import chatbot.util.*;
 
 import javax.swing.*;
@@ -35,6 +36,7 @@ public class ChatBotGUI extends JFrame {
     private JPanel             headerPanel;
     private JLabel             themeToggleBtn;
     private ParticleBackground particleBg;
+    private JPanel             suggestionBar;
 
     public ChatBotGUI() {
         profile = UserProfile.load();
@@ -259,16 +261,69 @@ public class ChatBotGUI extends JFrame {
         sendButton.addActionListener(e->handleSend());
         row.add(gip,BorderLayout.CENTER);
         row.add(sendButton,BorderLayout.EAST);
+        // Suggestion chips
+        suggestionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        suggestionBar.setOpaque(false);
+        suggestionBar.setVisible(false);
+
         bottom.add(statusLabel,BorderLayout.NORTH);
-        bottom.add(row,BorderLayout.CENTER);
+        bottom.add(suggestionBar, BorderLayout.CENTER);
+        bottom.add(row,BorderLayout.SOUTH);
         return bottom;
+    }
+
+    void showSuggestions(String[] suggestions) {
+        suggestionBar.removeAll();
+        for (String s : suggestions) {
+            JLabel chip = new JLabel(s);
+            chip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            chip.setForeground(AppConfig.ACCENT);
+            chip.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(), AppConfig.ACCENT.getBlue(), 80), 1, true),
+                new EmptyBorder(3, 10, 3, 10)
+            ));
+            chip.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            chip.setBackground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(), AppConfig.ACCENT.getBlue(), 15));
+            chip.setOpaque(true);
+            chip.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    inputField.setText(s);
+                    handleSend();
+                    suggestionBar.setVisible(false);
+                }
+                public void mouseEntered(MouseEvent e) { chip.setForeground(AppConfig.ACCENT_GLOW); }
+                public void mouseExited(MouseEvent e)  { chip.setForeground(AppConfig.ACCENT); }
+            });
+            suggestionBar.add(chip);
+        }
+        suggestionBar.setVisible(true);
+        suggestionBar.revalidate();
+        suggestionBar.repaint();
     }
 
     // ── Chat logic ────────────────────────────────────────────────────────────
 
     private void showWelcome() {
-        String n = profile.userName.isEmpty() ? "" : ", "+profile.userName;
-        addMsg(new Message("Hello"+n+"! I'm ORYN\nYour intelligent assistant — light of knowledge.\nType **help** to see what I can do!", Message.Sender.BOT), true);
+        SmartChatBot smartBot = (SmartChatBot) bot;
+        chatbot.intelligence.LongMemory mem  = smartBot.getMemory();
+        chatbot.intelligence.BondSystem  bond = smartBot.getBond();
+
+        String welcomeMsg;
+        if (mem.isFirstTodaySession()) {
+            // Daily digest on first open of the day
+            welcomeMsg = chatbot.intelligence.DailyDigest.generate(profile.userName, mem, bond);
+        } else {
+            // Return greeting
+            welcomeMsg = bond.getGreetingFlavour(profile.userName) +
+                "\nType **help** to see what I can do, or just say hi!";
+        }
+        addMsg(new Message(welcomeMsg, Message.Sender.BOT), true);
+        // Show smart suggestions after welcome
+        SwingUtilities.invokeLater(this::showWelcomeSuggestions);
+    }
+
+    private void showWelcomeSuggestions() {
+        showSuggestions(new String[]{"Tell me something interesting", "What can you do?", "Give me a quote"});
     }
 
     private void handleSend() {
@@ -288,6 +343,8 @@ public class ChatBotGUI extends JFrame {
                     String r=get(); showTyping(false);
                     Message bm=new Message(r,Message.Sender.BOT);
                     history.add(bm); addMsg(bm,true); SoundManager.playChime();
+                    // Smart suggestions based on reply content
+                    SwingUtilities.invokeLater(()->showSmartSuggestions(r, text));
                     if(text.equalsIgnoreCase("bye")||text.equalsIgnoreCase("exit")){
                         Timer t=new Timer(1200,ev->System.exit(0));t.setRepeats(false);t.start();
                     }
@@ -399,6 +456,23 @@ public class ChatBotGUI extends JFrame {
     private void setStatus(String t){statusLabel.setText("  "+t);}
 
     // ── Actions ───────────────────────────────────────────────────────────────
+
+    private void showSmartSuggestions(String botReply, String userInput) {
+        String lower = userInput.toLowerCase();
+        String[] chips;
+        if (lower.contains("joke"))         chips = new String[]{"Tell me another joke", "Give me a quote", "Trivia question"};
+        else if (lower.contains("wiki") || lower.contains("tell me about"))
+                                            chips = new String[]{"Tell me more", "Related topic?", "Give me a trivia"};
+        else if (lower.contains("trivia"))  chips = new String[]{"Another trivia", "Tell me the answer", "Different topic"};
+        else if (lower.contains("weather")) chips = new String[]{"Weather tomorrow?", "Tell me a fact", "What else can you do?"};
+        else if (lower.contains("help"))    chips = new String[]{"Tell me about black holes", "Give me a joke", "What's today's date?"};
+        else if (lower.contains("hello") || lower.contains("hi"))
+                                            chips = new String[]{"What can you do?", "Tell me something cool", "Give me a quote"};
+        else if (lower.contains("debate"))  chips = new String[]{"Debate another topic", "I agree with FOR", "I agree with AGAINST"};
+        else if (lower.contains("score"))   chips = new String[]{"How do I level up?", "Show my interests", "Tell me a trivia"};
+        else                                chips = new String[]{"Tell me more", "Give me a quote", "Trivia question"};
+        showSuggestions(chips);
+    }
 
     private void toggleTheme(){
         AppConfig.setDark(!AppConfig.isDark());

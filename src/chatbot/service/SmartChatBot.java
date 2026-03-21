@@ -1,5 +1,7 @@
 package chatbot.service;
 
+import chatbot.intelligence.*;
+import chatbot.util.UserProfile;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +20,16 @@ public class SmartChatBot implements ChatService {
     private int    messageCount  = 0;
     private final Deque<String>  recentInputs = new ArrayDeque<>(5);
     private final Map<String, String> userFacts = new LinkedHashMap<>();
+
+    // ── Intelligence Layer ────────────────────────────────────────────────────
+    private final MoodEngine  mood   = new MoodEngine();
+    private final LongMemory  memory = LongMemory.load();
+    private final BondSystem  bond   = new BondSystem(new UserProfile(), memory.totalMessages);
+    private boolean debateMode = false;
+    private String  debateTopic = "";
+    private boolean focusMode  = false;
+    private String  focusTask  = "";
+    private int     orynScore  = 0;
 
     // ── Greeting Rotator ─────────────────────────────────────────────────────
     private static final String[] GREETINGS = {
@@ -41,6 +53,54 @@ public class SmartChatBot implements ChatService {
         // Track recent context
         if (recentInputs.size() == 5) recentInputs.pollFirst();
         recentInputs.addLast(lower);
+
+        // ── Intelligence Layer ────────────────────────────────────────────────
+        // 1. Easter eggs (checked first — highest priority)
+        String egg = EasterEggs.check(input);
+        if (egg != null) return egg;
+
+        // 2. Mood detection
+        MoodEngine.Mood detectedMood = mood.detect(lower);
+
+        // 3. Bond increment + level-up check
+        bond.increment();
+        memory.totalMessages++;
+        if (bond.justLevelledUp()) {
+            memory.save();
+            return bond.getLevelUpMessage();
+        }
+
+        // 4. Focus mode — only allow task messages
+        if (focusMode) {
+            if (matches(lower, "focus off|stop focus|exit focus|end focus")) {
+                focusMode = false;
+                return "🎯 Focus mode ended! Great work. Welcome back to free conversation 😊";
+            }
+            return handleFocusMode(input);
+        }
+
+        // 5. Focus mode activation
+        if (matches(lower, "focus mode|deep focus|focus on|help me focus")) {
+            String task = extractGroup(lower, "(?:focus on|help me focus on|focus mode for)\\s+(.+)");
+            focusMode = true;
+            focusTask = task != null ? task : "your task";
+            return "\uD83C\uDFAF **Focus Mode Activated!**\nTask: " + focusTask + "\n\nI'll keep you on track. No distractions. Type 'focus off' when done.\nNow -- what's your first step?";
+        }
+
+        // 6. Debate mode
+        if (matches(lower, "debate|argue (for|against|about)|both sides of")) {
+            String topic = extractGroup(lower, "(?:debate|argue about|both sides of)\\s+(.+)");
+            if (topic != null) return handleDebate(topic);
+        }
+
+        // 7. ORYN Score
+        if (matches(lower, "my score|oryn score|show score|how much have i learned")) {
+            return buildScoreCard();
+        }
+
+        // 8. Interest tracking
+        memory.trackTopic(lastTopic.isEmpty() ? inferTopic(lower) : lastTopic);
+        memory.save();
 
         // ── Identity & Name ───────────────────────────────────────────────────
         if (matches(lower, "who are you|what are you|your name|are you a bot|are you ai")) {
@@ -238,11 +298,82 @@ public class SmartChatBot implements ChatService {
         if (messageCount == 25) return "25 messages in — ORYN is fully warmed up! 🔥 Ask me anything.";
 
         // ── Default ───────────────────────────────────────────────────────────
-        return getDefaultReply(lower);
+        String reply = getDefaultReply(lower);
+        // Inject mood prefix if mood changed
+        if (mood.shouldInjectPrefix()) reply = mood.getPrefix() + reply;
+        return reply;
     }
 
     /** Allow GUI to pre-set username from saved profile */
-    public void setUserName(String name) { this.userName = name; }
+    public void setUserName(String name) {
+        this.userName = name;
+        if (!name.isEmpty()) memory.storeFact("name", name);
+    }
+
+    public LongMemory  getMemory() { return memory; }
+    public BondSystem  getBond()   { return bond;   }
+    public MoodEngine  getMood()   { return mood;   }
+    public boolean     isFocusMode() { return focusMode; }
+
+    // ── Debate Mode ───────────────────────────────────────────────────────────
+    private String handleDebate(String topic) {
+        debateTopic = topic;
+        debateMode  = true;
+        orynScore  += 5;
+        return "\u2696\uFE0F **Debate: " + topic + "**\n\n" +
+               "**FOR** \u2705\n" + getDebateFor(topic) + "\n\n" +
+               "**AGAINST** \u274C\n" + getDebateAgainst(topic) + "\n\n" +
+               "_ORYN presents both sides objectively. What do YOU think?_";
+    }
+
+    private String getDebateFor(String topic) {
+        return "\u2022 Many experts argue that " + topic + " has clear benefits for society.\n" +
+               "\u2022 Historical evidence suggests positive outcomes when properly implemented.\n" +
+               "\u2022 Proponents highlight increased efficiency, freedom, or quality of life.";
+    }
+
+    private String getDebateAgainst(String topic) {
+        return "\u2022 Critics point out potential risks and unintended consequences of " + topic + ".\n" +
+               "\u2022 There are ethical concerns that deserve careful consideration.\n" +
+               "\u2022 Alternative approaches may achieve similar goals with fewer drawbacks.";
+    }
+
+    // ── Focus Mode ────────────────────────────────────────────────────────────
+    private String handleFocusMode(String input) {
+        String lower = input.toLowerCase();
+        if (matches(lower, "done|finished|completed|next step|what now")) {
+            orynScore += 10;
+            return "\uD83C\uDFAF Great progress on **" + focusTask + "**! \u2705\nWhat is your next step?";
+        }
+        if (matches(lower, "stuck|help|how|what")) {
+            return "\uD83C\uDFAF Focus: **" + focusTask + "**\nBreak it into smaller steps. What is the single smallest thing you can do right now?";
+        }
+        return "\uD83C\uDFAF Stay focused on: **" + focusTask + "**\nYou have got this! (Type focus off when done)";
+    }
+
+    // ── Score Card ────────────────────────────────────────────────────────────
+    private String buildScoreCard() {
+        String interests = memory.getTopInterests();
+        return "\uD83C\uDFC6 **Your ORYN Score**\n\n" +
+               "\uD83D\uDCAC Messages sent: **" + memory.totalMessages + "**\n" +
+               "\uD83C\uDF1F Bond level: **" + bond.getLevelName() + "** " + bond.getLevelEmoji() + "\n" +
+               "\uD83D\uDCCA Progress to next level: **" + bond.getProgressToNext() + "%**\n" +
+               (interests != null ? "\uD83D\uDCCC Top interests: **" + interests + "**\n" : "") +
+               "\uD83C\uDFAF Focus mode: **" + (focusMode ? "Active now!" : "Type focus mode to start") + "**\n\n" +
+               "_Keep exploring -- every question makes you wiser!_ \u2728";
+    }
+
+    // ── Topic inference ───────────────────────────────────────────────────────
+    private String inferTopic(String lower) {
+        if (matches(lower, "weather"))   return "weather";
+        if (matches(lower, "joke|funny")) return "humor";
+        if (matches(lower, "wiki|tell me about|what is")) return "wikipedia";
+        if (matches(lower, "trivia|quiz")) return "trivia";
+        if (matches(lower, "math|calculat")) return "mathematics";
+        if (matches(lower, "quote|inspir")) return "inspiration";
+        if (matches(lower, "time|date"))   return "time";
+        return "";
+    }
 
     @Override
     public void reset() {
@@ -251,6 +382,11 @@ public class SmartChatBot implements ChatService {
         messageCount = 0;
         recentInputs.clear();
         userFacts.clear();
+        mood.reset();
+        debateMode = false;
+        focusMode  = false;
+        memory.facts.clear();
+        memory.save();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -284,10 +420,12 @@ public class SmartChatBot implements ChatService {
 
     private String continueTopic() {
         return switch (lastTopic) {
-            case "joke"    -> "Here's another one! " + WebApiService.getJoke();
-            case "quote"   -> "One more for you: " + WebApiService.getQuote();
-            case "weather" -> "Ask me about a specific city for weather details!";
-            default        -> "Tell me more about what you'd like to know 😊";
+            case "joke"       -> "Here's another one! " + WebApiService.getJoke();
+            case "quote"      -> "One more for you: " + WebApiService.getQuote();
+            case "weather"    -> "Ask me about a specific city for weather details!";
+            case "trivia"     -> "Another one! " + WebApiService.getTrivia();
+            case "wiki"       -> "What else would you like to know about? Try 'tell me about [topic]'";
+            default           -> "Tell me more about what you'd like to know 😊";
         };
     }
 
