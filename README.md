@@ -3,71 +3,67 @@
 # ✦ ORYN
 ### *Light of Knowledge*
 
-![Version](https://img.shields.io/badge/version-4.2-rose?style=for-the-badge)
-![Java](https://img.shields.io/badge/Java-17%2B-orange?style=for-the-badge&logo=java)
-![License](https://img.shields.io/badge/license-MIT-pink?style=for-the-badge)
-![Platform](https://img.shields.io/badge/platform-Windows-blue?style=for-the-badge)
+<br>
 
-*A premium AI chatbot with glassmorphism UI, emotional intelligence, and a soul.*
+![Java](https://img.shields.io/badge/Java-17+-orange?logo=openjdk&logoColor=white&style=flat-square)
+![Version](https://img.shields.io/badge/Version-4.2-blueviolet?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white&style=flat-square)
+![Libraries](https://img.shields.io/badge/External%20Libraries-Zero-success?style=flat-square)
+![Stars](https://img.shields.io/github/stars/gayathrisanthoshpc/AI-Chatbot-Java?style=flat-square&color=gold)
+
+<br>
+
+> *A premium AI chatbot built entirely in Java — glassmorphism UI, emotional intelligence,*
+> *mood detection, bond system, mini games, voice input and easter eggs.*
+> *Zero external libraries. Everything from scratch.*
+
+<br>
 
 </div>
 
 ---
 
-## 🌸 What is ORYN?
+<div align="center">
 
-ORYN is not just another chatbot. It is a fully hand-crafted Java desktop application built with **zero external libraries** — every pixel, every animation, every intelligence layer written from scratch.
+## 🌸 Rose Noir · Glassmorphism · Java Swing
 
-Named after an invented word meaning *light of knowledge*, ORYN is designed to feel genuinely personal — it remembers you, grows closer to you over time, senses your mood, and surprises you with things you never expected from a chatbot.
+| 🎨 Beautiful UI | 🧠 Real Intelligence | 🎮 Fun Features |
+|:---:|:---:|:---:|
+| Frosted glass bubbles | Mood detection | Mini games |
+| Rose gold animations | Bond system (6 levels) | Easter eggs |
+| Particle background | Cross-session memory | Voice input |
+| Custom ORYN logo | Daily digest | Personality modes |
+| Light & dark mode | Smart suggestions | Debate mode |
+
+</div>
 
 ---
 
-## ✨ Features
+## ✨ What Makes ORYN Unique
 
-### 🎨 Rose Noir Glassmorphism UI
-- Frosted glass bubbles with rose gold gradient borders
-- Animated floating particles in background
-- Warm ivory light mode / deep noir dark mode
-- ORYN signature asymmetric bubble corners — a unique trademark style
-- Animated slide-in message transitions
-- Pulsing orb avatar with custom programmatic logo
+ORYN is not just another chatbot. It's a passion project exploring what a truly **personal, beautiful Java desktop application** can be.
 
-### 🧠 Intelligence Layer
-| Feature | Description |
+- 🤝 **Bond System** — relationship grows from *Stranger* → *Trusted Soul* over 300+ messages
+- 🎭 **Mood Engine** — detects happiness, frustration, curiosity, stress and adapts its tone
+- 🧩 **Long Memory** — remembers your name, interests and topics across sessions
+- 🌅 **Daily Digest** — personalised briefing every new day
+- 🥚 **Easter Eggs** — hidden commands that unlock secret ORYN experiences
+- 🎙️ **Voice Input** — speak to ORYN via Windows Speech Recognition
+- 🎯 **Focus Mode** — deep work assistant with task tracking
+- ⚖️ **Debate Mode** — argues both sides of any topic
+
+---
+
+## 🌐 Free APIs — No Key Required
+
+| API | Feature |
 |---|---|
-| **Mood Detection** | Senses happiness, frustration, curiosity, stress and adapts tone |
-| **Bond System** | Relationship grows from Stranger → Trusted Soul over 300+ messages |
-| **Long Memory** | Remembers your name, interests, and topics across sessions |
-| **Daily Digest** | Personalised briefing every new day with your top interests |
-| **Personality Modes** | Default, Formal, Casual, Playful — switch anytime |
-| **Context Awareness** | Understands follow-up questions naturally |
-| **Smart Suggestions** | Clickable follow-up chips after every reply |
-
-### 🌐 Free APIs (no API key needed)
-- 🌤 **Weather** — `wttr.in` — real-time weather by city
-- 😄 **Jokes** — `official-joke-api`
-- 📖 **Wikipedia** — `en.wikipedia.org/api` — summaries on any topic
-- 🧠 **Trivia** — `opentdb.com` — random trivia with answer checking
-- 💬 **Quotes** — `api.quotable.io` — inspirational quotes
-- 🔢 **Number Facts** — `numbersapi.com`
-
-### 🎮 Mini Games
-- **Number Game** — guess a number 1–100 with narrowing hints
-- **Word Game** — guess a word from a clue with letter matching
-- **Riddles** — classic riddles with give-up option
-
-### 🥚 Easter Eggs (discover them yourself...)
-Hidden commands that unlock secret ORYN experiences. Some hints: try `knock knock`, `oryn dance`, `matrix`, `sudo`, `sing`, `magic 8 ball`, `what are you made of`...
-
-### ⚙️ Power Features
-- 🎙️ Voice input — speak to ORYN (Windows Speech Recognition)
-- 🔍 Search through chat history with highlight
-- 💾 Save chat as `.txt`
-- 📄 Export chat as PDF
-- 🏆 ORYN Score — track your learning journey
-- 🎯 Focus Mode — deep work assistant
-- ⚖️ Debate Mode — ORYN argues both sides of any topic
-- ⚙️ Settings — font size, sound, theme, username
+| `wttr.in` | 🌤 Live weather by city |
+| `opentdb.com` | 🧠 Trivia with answer checking |
+| `en.wikipedia.org/api` | 📖 Summaries on any topic |
+| `quotable.io` | 💬 Inspirational quotes |
+| `official-joke-api` | 😄 Random jokes |
+| `numbersapi.com` | 🔢 Fun number facts |
 
 ---
 
@@ -75,18 +71,18 @@ Hidden commands that unlock secret ORYN experiences. Some hints: try `knock knoc
 
 ### Prerequisites
 - Java 17 or higher
-- IntelliJ IDEA (recommended) or any Java IDE
+- IntelliJ IDEA (recommended)
 
 ### Run in IntelliJ
 ```bash
-# 1. Clone the repo
-git clone https://github.com/yourusername/AI-Chatbot-Java.git
+# 1. Clone
+git clone https://github.com/gayathrisanthoshpc/AI-Chatbot-Java.git
 
 # 2. Open in IntelliJ IDEA
-# File → Open → select the project folder
+# File → Open → select project folder
 
 # 3. Run
-# Open src/chatbot/ChatBot.java → click ▶ Run
+# Open src/chatbot/ChatBot.java → click ▶
 ```
 
 ### Run from terminal
@@ -97,93 +93,72 @@ java -cp out chatbot.ChatBot
 
 ---
 
-## 💬 Commands Reference
+## 💬 Commands
 
-| Say this | ORYN does this |
+| Say this | What happens |
 |---|---|
-| `hi` / `hello` | Greets you based on bond level |
-| `tell me about black holes` | Wikipedia summary |
-| `weather in London` | Live weather |
+| `tell me about [topic]` | Wikipedia summary |
+| `weather in [city]` | Live weather |
 | `trivia` | Random trivia question |
-| `debate free will` | Argues both sides |
-| `number game` | Starts guessing game |
-| `word game` | Starts word guessing |
-| `riddle` | Tells a riddle |
+| `debate [topic]` | Argues both sides |
+| `number game` | Guessing game 1–100 |
+| `word game` | Word guessing with hints |
+| `riddle` | Classic riddle |
 | `be formal` / `be playful` | Changes personality |
-| `focus on my project` | Activates focus mode |
-| `my score` | Shows ORYN score card |
+| `focus on [task]` | Activates focus mode |
+| `my score` | ORYN score card |
+| `knock knock` | 🥚 Try it... |
 | `help` | Full feature list |
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Architecture
 ```
 src/chatbot/
-├── ChatBot.java                  ← Entry point
-├── model/
-│   └── Message.java              ← Data model
-├── service/
-│   ├── ChatService.java          ← Interface
-│   ├── SmartChatBot.java         ← Main brain
-│   └── WebApiService.java        ← Free API calls
-├── intelligence/
-│   ├── MoodEngine.java           ← Emotion detection
-│   ├── LongMemory.java           ← Cross-session memory
-│   ├── BondSystem.java           ← Relationship levels
-│   ├── DailyDigest.java          ← Daily briefing
-│   ├── EasterEggs.java           ← Hidden surprises
-│   ├── PersonalityEngine.java    ← Tone modes
-│   └── MiniGames.java            ← In-chat games
-├── ui/
-│   ├── ChatBotGUI.java           ← Main window
-│   ├── ORYNBubble.java           ← Glassmorphism bubbles
-│   ├── ORYNIcon.java             ← Programmatic logo
-│   ├── ParticleBackground.java   ← Animated particles
-│   ├── VoiceInput.java           ← Mic button
-│   ├── TypingIndicator.java      ← Animated dots
-│   ├── AetherDialog.java         ← Styled dialogs
-│   └── SettingsPanel.java        ← Settings window
-└── util/
-    ├── AppConfig.java            ← Rose Noir theme
-    ├── UserProfile.java          ← Saved preferences
-    ├── LongMemory.java           ← Persistence
-    ├── SoundManager.java         ← Audio feedback
-    ├── ChatHistory.java          ← Save to .txt
-    └── PdfExporter.java          ← Export to PDF
+├── intelligence/          ← The brain
+│   ├── MoodEngine         ← Emotion detection
+│   ├── BondSystem         ← Relationship levels
+│   ├── LongMemory         ← Cross-session memory
+│   ├── DailyDigest        ← Morning briefing
+│   ├── PersonalityEngine  ← Tone modes
+│   ├── MiniGames          ← In-chat games
+│   └── EasterEggs         ← Hidden surprises
+├── service/               ← Logic layer
+│   ├── SmartChatBot       ← Main brain
+│   └── WebApiService      ← Free API calls
+├── ui/                    ← Everything visual
+│   ├── ORYNBubble         ← Glassmorphism bubbles
+│   ├── ORYNIcon           ← Programmatic logo
+│   ├── ParticleBackground ← Animated particles
+│   └── VoiceInput         ← Mic button
+└── util/                  ← Support layer
+    ├── AppConfig          ← Rose Noir theme
+    ├── SoundManager       ← Audio (no files needed)
+    └── PdfExporter        ← Export to PDF
 ```
 
 ---
 
 ## 🛠️ Built With
 
-- **Java Swing** — UI framework
-- **Java AWT Graphics2D** — Custom painting, glassmorphism effects
-- **java.net.http** — Free API calls
-- **javax.sound.sampled** — Sound generation
-- **java.awt.print** — PDF export
-- **PowerShell System.Speech** — Voice recognition (Windows)
-- **Zero external libraries** — Everything built from scratch
+**100% pure Java — zero external libraries**
+
+`Java Swing` · `AWT Graphics2D` · `java.net.http` · `javax.sound.sampled` · `java.awt.print` · `PowerShell System.Speech`
 
 ---
 
 ## 🌱 Roadmap
 
-- [ ] Image analysis — drop image, ORYN describes it
-- [ ] Multi-language support
+- [ ] Image drop and analysis
+- [ ] Multi-language support  
 - [ ] Plugin system for custom commands
-- [ ] Mobile companion app
-
----
-
-## 👩‍💻 Author
-
-Built with 💗 as a passion project exploring what a truly personal, beautiful Java chatbot could be.
 
 ---
 
 <div align="center">
 
 *"Knowledge is the light that never dims."*
-**— ORYN**
+
+**— ORYN ✦**
 
 </div>
