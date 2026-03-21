@@ -375,13 +375,13 @@ public class ChatBotGUI extends JFrame {
     }
 
     private void saveChat() {
-        if (history.isEmpty()) { JOptionPane.showMessageDialog(this,"No messages to save.","Save",JOptionPane.INFORMATION_MESSAGE); return; }
-        try { String p=ChatHistory.save(history); JOptionPane.showMessageDialog(this,"Saved to:\n"+p,"Saved \u2713",JOptionPane.INFORMATION_MESSAGE); }
-        catch (IOException ex) { JOptionPane.showMessageDialog(this,"Error: "+ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE); }
+        if (history.isEmpty()) { AetherDialog.showInfo(this, "Save Chat", "No messages to save yet."); return; }
+        try { String p=ChatHistory.save(history); AetherDialog.showInfo(this, "Saved ✓", "Chat saved to:\n" + p); }
+        catch (IOException ex) { AetherDialog.showError(this, "Save Failed", ex.getMessage()); }
     }
 
     private void clearChat() {
-        if (JOptionPane.showConfirmDialog(this,"Clear all messages?","Clear",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
+        if (AetherDialog.showConfirm(this, "Clear Chat", "Clear all messages? This cannot be undone.")) {
             history.clear(); chatPanel.removeAll(); chatPanel.add(typingIndicator);
             chatPanel.revalidate(); chatPanel.repaint(); showWelcome();
         }

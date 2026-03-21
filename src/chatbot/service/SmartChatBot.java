@@ -190,10 +190,19 @@ public class SmartChatBot implements ChatService {
         }
 
         // ── Wikipedia ─────────────────────────────────────────────────────────
-        if (matches(lower, "wiki|wikipedia|tell me about|what is|who is|what are|explain")) {
+        if (matches(lower, "wiki|wikipedia|tell me about")) {
             String topic = extractGroup(lower,
-                "(?:wiki(?:pedia)?|tell me about|what is|who is|what are|explain)\\s+(.+)");
+                "(?:wiki(?:pedia)?|tell me about)\\s+(.+)");
             if (topic != null && !topic.isBlank()) {
+                lastTopic = "wiki";
+                return WebApiService.getWikipedia(topic.trim());
+            }
+        }
+        // what is / who is — only trigger wiki if topic has 2+ words or is specific
+        if (matches(lower, "^what is |^who is |^what are |^explain ")) {
+            String topic = extractGroup(lower,
+                "^(?:what is|who is|what are|explain)\\s+(.+)");
+            if (topic != null && topic.trim().length() > 3) {
                 lastTopic = "wiki";
                 return WebApiService.getWikipedia(topic.trim());
             }

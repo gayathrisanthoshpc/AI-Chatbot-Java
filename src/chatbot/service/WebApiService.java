@@ -77,7 +77,9 @@ public class WebApiService {
     // ── Wikipedia Summary ─────────────────────────────────────────────────────
     public static String getWikipedia(String topic) {
         try {
-            String encoded = URLEncoder.encode(topic.trim(), StandardCharsets.UTF_8);
+            // Wikipedia REST API uses underscores, not %20
+            String encoded = topic.trim().replace(" ", "_");
+            encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8).replace("%5F","_");
             String body    = get("https://en.wikipedia.org/api/rest_v1/page/summary/" + encoded);
             if (body != null) {
                 String extract = extract(body, "\"extract\":\"", "\"");

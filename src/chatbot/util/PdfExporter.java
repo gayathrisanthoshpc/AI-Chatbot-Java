@@ -3,6 +3,7 @@ package chatbot.util;
 import chatbot.model.Message;
 
 import javax.swing.*;
+import chatbot.ui.AetherDialog;
 import java.awt.*;
 import java.awt.print.*;
 import java.time.LocalDateTime;
@@ -107,7 +108,7 @@ public class PdfExporter implements Printable {
     /** Show print dialog and export. Returns true if user confirmed. */
     public static boolean export(List<Message> messages, JFrame parent) {
         if (messages.isEmpty()) {
-            JOptionPane.showMessageDialog(parent, "No messages to export.", "Export PDF", JOptionPane.INFORMATION_MESSAGE);
+            AetherDialog.showInfo((javax.swing.JFrame)parent, "Export PDF", "No messages to export yet.");
             return false;
         }
 
@@ -119,9 +120,7 @@ public class PdfExporter implements Printable {
         if (job.printDialog()) {
             try {
                 job.print();
-                JOptionPane.showMessageDialog(parent,
-                    "Chat exported successfully!\nChoose 'Save as PDF' in the print dialog to get a PDF file.",
-                    "Export Complete ✓", JOptionPane.INFORMATION_MESSAGE);
+                AetherDialog.showInfo((javax.swing.JFrame)parent, "Export Complete ✓", "Chat exported!\nChoose 'Save as PDF' in the print dialog.");
                 return true;
             } catch (PrinterException ex) {
                 JOptionPane.showMessageDialog(parent,
