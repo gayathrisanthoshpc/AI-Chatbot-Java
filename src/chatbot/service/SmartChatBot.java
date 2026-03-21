@@ -177,6 +177,28 @@ public class SmartChatBot implements ChatService {
             return "Memory cleared! Starting fresh 🗑️";
         }
 
+        // ── Trivia answer check ───────────────────────────────────────────────
+        if (WebApiService.hasPendingTrivia()) {
+            String result = WebApiService.checkTriviaAnswer(input);
+            if (result != null) return result;
+        }
+
+        // ── Trivia ────────────────────────────────────────────────────────────
+        if (matches(lower, "trivia|quiz|question|test me|challenge me")) {
+            lastTopic = "trivia";
+            return WebApiService.getTrivia();
+        }
+
+        // ── Wikipedia ─────────────────────────────────────────────────────────
+        if (matches(lower, "wiki|wikipedia|tell me about|what is|who is|what are|explain")) {
+            String topic = extractGroup(lower,
+                "(?:wiki(?:pedia)?|tell me about|what is|who is|what are|explain)\\s+(.+)");
+            if (topic != null && !topic.isBlank()) {
+                lastTopic = "wiki";
+                return WebApiService.getWikipedia(topic.trim());
+            }
+        }
+
         // ── Help ─────────────────────────────────────────────────────────────
         if (matches(lower, "help|what can you do|commands|features|capabilities")) {
             return buildHelp();
@@ -209,6 +231,9 @@ public class SmartChatBot implements ChatService {
         // ── Default ───────────────────────────────────────────────────────────
         return getDefaultReply(lower);
     }
+
+    /** Allow GUI to pre-set username from saved profile */
+    public void setUserName(String name) { this.userName = name; }
 
     @Override
     public void reset() {
@@ -268,8 +293,11 @@ public class SmartChatBot implements ChatService {
                 😄 Jokes     — "Tell me a joke"
                 💬 Quotes    — "Give me a quote" / "Inspire me"
                 🔢 Numbers   — "Fact about 42"
+                📖 Wikipedia — "Tell me about black holes" / "What is gravity?"
+                🧠 Trivia    — "Give me a trivia question" / "Test me"
                 📝 Memory    — "My name is..." / "Remember that..."
                 🗑️ Reset     — "Forget everything"
+                ⚙️ Settings  — Click the gear icon in the header
                 ❓ Help      — You're looking at it!""";
     }
 

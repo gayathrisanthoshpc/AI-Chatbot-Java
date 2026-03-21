@@ -5,9 +5,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Calls free public APIs. All methods return a fallback string if offline or API fails.
+ * Free public API integrations — all with offline fallback.
+ * APIs: wttr.in, official-joke-api, numbersapi, quotable, wikipedia, opentdb
  */
 public class WebApiService {
 
@@ -16,30 +19,25 @@ public class WebApiService {
             .build();
 
     // ── Weather ───────────────────────────────────────────────────────────────
-
     public static String getWeather(String city) {
         try {
-            String url = "https://wttr.in/" + city.replace(" ", "+") + "?format=3";
-            String body = get(url);
+            String body = get("https://wttr.in/" + city.replace(" ", "+") + "?format=3");
             if (body != null && !body.isBlank()) return "🌤 " + body.trim();
         } catch (Exception ignored) {}
         return "⚠ Couldn't fetch weather right now. Check your connection.";
     }
 
     // ── Joke ──────────────────────────────────────────────────────────────────
-
     public static String getJoke() {
         try {
             String body = get("https://official-joke-api.appspot.com/random_joke");
             if (body != null) {
-                // Parse manually — no external JSON lib
-                String setup   = extract(body, "\"setup\":\"",   "\"");
+                String setup     = extract(body, "\"setup\":\"",     "\"");
                 String punchline = extract(body, "\"punchline\":\"", "\"");
                 if (setup != null && punchline != null)
                     return "😄 " + setup + "\n👉 " + punchline;
             }
         } catch (Exception ignored) {}
-        // Offline fallback jokes
         String[] fallback = {
             "Why do programmers prefer dark mode? Because light attracts bugs! 🐛",
             "I told my computer I needed a break. Now it won't stop sending me Kit-Kat ads.",
@@ -49,17 +47,15 @@ public class WebApiService {
     }
 
     // ── Number Fact ───────────────────────────────────────────────────────────
-
     public static String getNumberFact(int number) {
         try {
             String body = get("http://numbersapi.com/" + number + "/trivia");
             if (body != null && !body.isBlank()) return "🔢 " + body.trim();
         } catch (Exception ignored) {}
-        return "🔢 " + number + " is a perfectly respectable number! (Offline — no fact available)";
+        return "🔢 " + number + " is a perfectly respectable number!";
     }
 
     // ── Quote ─────────────────────────────────────────────────────────────────
-
     public static String getQuote() {
         try {
             String body = get("https://api.quotable.io/random");
@@ -70,7 +66,6 @@ public class WebApiService {
                     return "💬 \"" + content + "\"\n  — " + author;
             }
         } catch (Exception ignored) {}
-        // Offline fallback quotes
         String[] fallback = {
             "\"The only way to do great work is to love what you do.\" — Steve Jobs",
             "\"In the middle of difficulty lies opportunity.\" — Albert Einstein",
@@ -79,25 +74,92 @@ public class WebApiService {
         return "💬 " + fallback[(int)(Math.random() * fallback.length)];
     }
 
+    // ── Wikipedia Summary ─────────────────────────────────────────────────────
+    public static String getWikipedia(String topic) {
+        try {
+            String encoded = URLEncoder.encode(topic.trim(), StandardCharsets.UTF_8);
+            String body    = get("https://en.wikipedia.org/api/rest_v1/page/summary/" + encoded);
+            if (body != null) {
+                String extract = extract(body, "\"extract\":\"", "\"");
+                String title   = extract(body, "\"title\":\"",   "\"");
+                if (extract != null && !extract.isBlank()) {
+                    // Unescape basic JSON escapes
+                    extract = extract.replace("\\n", " ").replace("\\\"", "\"");
+                    String shortSummary = extract.length() > 400
+                        ? extract.substring(0, 400) + "..."
+                        : extract;
+                    return "📖 **" + (title != null ? title : topic) + "**\n" + shortSummary;
+                }
+            }
+        } catch (Exception ignored) {}
+        return "📖 I couldn't find a Wikipedia article on \"" + topic + "\". Try rephrasing?";
+    }
+
+    // ── Trivia ────────────────────────────────────────────────────────────────
+    private static String pendingTriviaAnswer = null;
+    private static String pendingTriviaQuestion = null;
+
+    public static String getTrivia() {
+        try {
+            String body = get("https://opentdb.com/api.php?amount=1&type=multiple");
+            if (body != null) {
+                String question   = extract(body, "\"question\":\"",         "\"");
+                String answer     = extract(body, "\"correct_answer\":\"",   "\"");
+                String difficulty = extract(body, "\"difficulty\":\"",       "\"");
+                if (question != null && answer != null) {
+                    question = unescapeHtml(question);
+                    answer   = unescapeHtml(answer);
+                    pendingTriviaAnswer   = answer;
+                    pendingTriviaQuestion = question;
+                    String diff = difficulty != null ? " [" + difficulty + "]" : "";
+                    return "🧠 Trivia" + diff + ":\n" + question + "\n\nType your answer — I'll check it!";
+                }
+            }
+        } catch (Exception ignored) {}
+        // Fallback trivia
+        pendingTriviaAnswer   = "Paris";
+        pendingTriviaQuestion = "What is the capital of France?";
+        return "🧠 Trivia: What is the capital of France?\n\nType your answer!";
+    }
+
+    public static String checkTriviaAnswer(String userAnswer) {
+        if (pendingTriviaAnswer == null) return null;
+        boolean correct = pendingTriviaAnswer.equalsIgnoreCase(userAnswer.trim());
+        String result;
+        if (correct) {
+            result = "✅ Correct! \"" + pendingTriviaAnswer + "\" is right! 🎉 Want another? Say 'trivia'!";
+        } else {
+            result = "❌ Not quite! The answer was: **" + pendingTriviaAnswer + "**\nWant to try another? Say 'trivia'!";
+        }
+        pendingTriviaAnswer   = null;
+        pendingTriviaQuestion = null;
+        return result;
+    }
+
+    public static boolean hasPendingTrivia() { return pendingTriviaAnswer != null; }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static String get(String url) throws Exception {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(4))
-                .GET()
-                .build();
+                .GET().build();
         HttpResponse<String> res = CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
         return res.statusCode() == 200 ? res.body() : null;
     }
 
-    /** Minimal JSON/text field extractor — no external library needed. */
     private static String extract(String json, String startKey, String endChar) {
         int start = json.indexOf(startKey);
         if (start == -1) return null;
         start += startKey.length();
         int end = json.indexOf(endChar, start);
-        if (end == -1) return null;
-        return json.substring(start, end);
+        return end == -1 ? null : json.substring(start, end);
+    }
+
+    private static String unescapeHtml(String s) {
+        return s.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&#039;", "'").replace("&eacute;", "é")
+                .replace("&rsquo;", "'").replace("&ldquo;", "\"").replace("&rdquo;", "\"");
     }
 }

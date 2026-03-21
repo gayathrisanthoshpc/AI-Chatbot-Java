@@ -40,9 +40,9 @@ public class TypingIndicator extends JPanel {
         // Bubble background
         int bubbleW = DOT_COUNT * (DOT_SIZE + DOT_SPACING) + DOT_SPACING + 8;
         int bubbleH = DOT_SIZE + 18;
-        g2.setColor(AppConfig.BG_BOT_BUBBLE);
+        g2.setColor(AppConfig.BG_BOT_BUBBLE());
         g2.fillRoundRect(8, 4, bubbleW, bubbleH, 14, 14);
-        g2.setColor(AppConfig.BORDER_SUBTLE);
+        g2.setColor(AppConfig.BORDER_SUBTLE());
         g2.setStroke(new BasicStroke(0.8f));
         g2.drawRoundRect(8, 4, bubbleW, bubbleH, 14, 14);
 

@@ -67,18 +67,18 @@ public class MessageBubble extends JPanel {
         g2.fill(new RoundRectangle2D.Float(x + 2, y + 2, bubbleW, bubbleH, AppConfig.BUBBLE_RADIUS, AppConfig.BUBBLE_RADIUS));
 
         // Bubble background
-        Color bgColor = isUser ? AppConfig.BG_USER_BUBBLE : AppConfig.BG_BOT_BUBBLE;
+        Color bgColor = isUser ? AppConfig.BG_USER_BUBBLE() : AppConfig.BG_BOT_BUBBLE();
         g2.setColor(bgColor);
         g2.fill(new RoundRectangle2D.Float(x, y, bubbleW, bubbleH, AppConfig.BUBBLE_RADIUS, AppConfig.BUBBLE_RADIUS));
 
         // Subtle border
-        g2.setColor(isUser ? AppConfig.ACCENT : AppConfig.BORDER_SUBTLE);
+        g2.setColor(isUser ? AppConfig.ACCENT : AppConfig.BORDER_SUBTLE());
         g2.setStroke(new BasicStroke(0.8f));
         g2.draw(new RoundRectangle2D.Float(x, y, bubbleW, bubbleH, AppConfig.BUBBLE_RADIUS, AppConfig.BUBBLE_RADIUS));
 
         // Text lines
         g2.setFont(AppConfig.FONT_MESSAGE);
-        g2.setColor(isUser ? AppConfig.TEXT_USER : AppConfig.TEXT_PRIMARY);
+        g2.setColor(isUser ? AppConfig.TEXT_USER() : AppConfig.TEXT_PRIMARY());
         int textX = x + AppConfig.BUBBLE_PADDING;
         int textY = y + AppConfig.BUBBLE_PADDING + fmMsg.getAscent();
         for (String l : lines) {
@@ -88,7 +88,7 @@ public class MessageBubble extends JPanel {
 
         // Timestamp
         g2.setFont(AppConfig.FONT_TIMESTAMP);
-        g2.setColor(AppConfig.TEXT_SECONDARY);
+        g2.setColor(AppConfig.TEXT_SECONDARY());
         int timeX = x + bubbleW - timeW - AppConfig.BUBBLE_PADDING;
         int timeY = y + bubbleH - fmTime.getDescent() - 4;
         g2.drawString(timestamp, timeX, timeY);
