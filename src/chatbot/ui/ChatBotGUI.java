@@ -3,21 +3,21 @@ package chatbot.ui;
 import chatbot.model.Message;
 import chatbot.service.ChatService;
 import chatbot.service.SmartChatBot;
-import chatbot.intelligence.*;
 import chatbot.util.*;
+import chatbot.intelligence.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.geom.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ORYN Lumina v3.1 — premium feel with particle background,
- * ORYN Trademark bubbles, styled dialogs, and full feature set.
+ * ORYN Rose Noir Glassmorphism UI v4.1
+ * Complete aesthetic redesign — frosted glass, rose gold, premium feel.
  */
 public class ChatBotGUI extends JFrame {
 
@@ -28,7 +28,7 @@ public class ChatBotGUI extends JFrame {
     private JPanel             chatPanel;
     private JScrollPane        scrollPane;
     private JTextField         inputField;
-    private AnimatedSendButton sendButton;
+    private RoseButton         sendButton;
     private TypingIndicator    typingIndicator;
     private JLabel             statusLabel;
     private JPanel             searchBar;
@@ -41,7 +41,7 @@ public class ChatBotGUI extends JFrame {
     public ChatBotGUI() {
         profile = UserProfile.load();
         AppConfig.setDark(profile.darkMode);
-        AppConfig.setFontSize(profile.fontSize > 0 ? profile.fontSize : 15);
+        AppConfig.setFontSize(profile.fontSize > 0 ? profile.fontSize : 14);
         SoundManager.setEnabled(profile.soundOn);
         if (!profile.userName.isEmpty()) ((SmartChatBot)bot).setUserName(profile.userName);
         initWindow();
@@ -50,49 +50,56 @@ public class ChatBotGUI extends JFrame {
     }
 
     private void initWindow() {
-        setTitle("ORYN — Lumina");
+        setTitle("ORYN");
         setSize(AppConfig.WINDOW_WIDTH, AppConfig.WINDOW_HEIGHT);
-        setMinimumSize(new Dimension(460, 540));
+        setMinimumSize(new Dimension(480, 560));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(AppConfig.BG_DARK());
         setLayout(new BorderLayout());
+        // Subtle window border
+        getRootPane().setBorder(BorderFactory.createLineBorder(
+            new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(), AppConfig.ACCENT.getBlue(), 40), 1));
     }
 
     private void initComponents() {
         headerPanel = buildHeader();
-        add(headerPanel,  BorderLayout.NORTH);
-        add(buildChat(),  BorderLayout.CENTER);
-        add(buildBottom(),BorderLayout.SOUTH);
+        add(headerPanel,   BorderLayout.NORTH);
+        add(buildChat(),   BorderLayout.CENTER);
+        add(buildBottom(), BorderLayout.SOUTH);
     }
 
-    // ── Header ────────────────────────────────────────────────────────────────
+    // ── Rose Noir Header ──────────────────────────────────────────────────────
 
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout()) {
             @Override protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D)g.create();
+                Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (AppConfig.isDark()) {
-                    GradientPaint bg = new GradientPaint(0,0,new Color(8,18,30),getWidth(),0,new Color(24,14,6));
-                    g2.setPaint(bg); g2.fillRect(0,0,getWidth(),getHeight());
-                    // teal glow left
-                    RadialGradientPaint tg = new RadialGradientPaint(new Point(55,getHeight()/2),90,
-                        new float[]{0f,1f},new Color[]{new Color(0,190,165,70),new Color(0,190,165,0)});
-                    g2.setPaint(tg); g2.fillOval(-25,-25,170,getHeight()+50);
-                    // amber glow right
-                    RadialGradientPaint ag = new RadialGradientPaint(new Point(getWidth()-35,getHeight()/2),65,
-                        new float[]{0f,1f},new Color[]{new Color(210,135,0,60),new Color(210,135,0,0)});
-                    g2.setPaint(ag); g2.fillOval(getWidth()-100,-20,130,getHeight()+40);
-                } else {
-                    GradientPaint bg = new GradientPaint(0,0,new Color(215,240,237),getWidth(),0,new Color(250,242,222));
-                    g2.setPaint(bg); g2.fillRect(0,0,getWidth(),getHeight());
-                }
-                // bottom glow line
-                GradientPaint line = new GradientPaint(0,0,AppConfig.ACCENT,getWidth()/2,0,AppConfig.ACCENT_GLOW,true);
-                g2.setPaint(line); g2.setStroke(new BasicStroke(1.5f));
-                g2.drawLine(0,getHeight()-1,getWidth(),getHeight()-1);
+
+                // Deep dark base
+                g2.setColor(AppConfig.isDark() ? new Color(12, 8, 16) : new Color(248, 240, 252));
+                g2.fillRect(0, 0, getWidth(), getHeight());
+
+                // Rose glow — left orb
+                RadialGradientPaint rg = new RadialGradientPaint(new Point(70, getHeight()/2), 90,
+                    new float[]{0f,1f}, new Color[]{new Color(212,100,150,55), new Color(212,100,150,0)});
+                g2.setPaint(rg); g2.fillOval(-20,-30,180,getHeight()+60);
+
+                // Gold glow — right orb
+                RadialGradientPaint gg = new RadialGradientPaint(new Point(getWidth()-50, getHeight()/2), 75,
+                    new float[]{0f,1f}, new Color[]{new Color(230,170,100,45), new Color(230,170,100,0)});
+                g2.setPaint(gg); g2.fillOval(getWidth()-125,-20,150,getHeight()+40);
+
+                // Bottom border — rose gold gradient line
+                GradientPaint borderLine = new GradientPaint(
+                    0, 0, new Color(160,60,100,180),
+                    getWidth()/2f, 0, new Color(230,150,180,220),
+                    true);
+                g2.setPaint(borderLine);
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawLine(0, getHeight()-1, getWidth(), getHeight()-1);
+
                 g2.dispose();
             }
         };
@@ -100,47 +107,66 @@ public class ChatBotGUI extends JFrame {
 
         JPanel content = new JPanel(new BorderLayout());
         content.setOpaque(false);
-        content.setBorder(new EmptyBorder(11,16,11,16));
+        content.setBorder(new EmptyBorder(13, 18, 13, 18));
 
-        // Left
-        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT,12,0));
+        // Left — avatar + name
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         left.setOpaque(false);
-        left.add(buildOrbAvatar());
-        JPanel namePanel = new JPanel();
-        namePanel.setLayout(new BoxLayout(namePanel,BoxLayout.Y_AXIS));
-        namePanel.setOpaque(false);
-        JLabel name = new JLabel(AppConfig.BOT_NAME);
-        name.setFont(new Font("Segoe UI",Font.BOLD,17));
-        name.setForeground(AppConfig.ACCENT_GLOW);
-        JLabel tag = new JLabel(AppConfig.BOT_TAGLINE+"  ·  Lumina v3.1");
-        tag.setFont(new Font("Segoe UI",Font.PLAIN,10));
-        tag.setForeground(new Color(AppConfig.ACCENT_AMBER.getRed(),AppConfig.ACCENT_AMBER.getGreen(),AppConfig.ACCENT_AMBER.getBlue(),190));
-        namePanel.add(name); namePanel.add(tag);
-        left.add(namePanel);
+        left.add(buildRoseOrb());
 
-        // Right icons
-        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT,4,0));
+        JPanel nameCol = new JPanel();
+        nameCol.setLayout(new BoxLayout(nameCol, BoxLayout.Y_AXIS));
+        nameCol.setOpaque(false);
+
+        JLabel nameLabel = new JLabel(AppConfig.BOT_NAME) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D)g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setFont(getFont());
+                // Rose gold gradient text
+                GradientPaint gp = new GradientPaint(0,0,AppConfig.ACCENT_GLOW,getWidth(),0,AppConfig.ACCENT_GOLD_SOFT);
+                g2.setPaint(gp);
+                g2.drawString(getText(), 0, g2.getFontMetrics().getAscent());
+                g2.dispose();
+            }
+        };
+        nameLabel.setFont(AppConfig.FONT_HEADER);
+        nameLabel.setForeground(AppConfig.ACCENT_GLOW);
+
+        JLabel tagLabel = new JLabel(AppConfig.BOT_TAGLINE + "  \u00b7  v" + AppConfig.VERSION);
+        tagLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        tagLabel.setForeground(new Color(AppConfig.ACCENT_GOLD.getRed(), AppConfig.ACCENT_GOLD.getGreen(),
+                                         AppConfig.ACCENT_GOLD.getBlue(), 170));
+        nameCol.add(nameLabel);
+        nameCol.add(tagLabel);
+        left.add(nameCol);
+
+        // Right — icon buttons
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
         right.setOpaque(false);
-        themeToggleBtn = hIcon(AppConfig.isDark()?"☀":"🌙","Toggle Theme");
-        JLabel srch  = hIcon("🔍","Search");
-        JLabel save  = hIcon("💾","Save Chat");
-        JLabel pdf   = hIcon("📄","Export PDF");
-        JLabel clr   = hIcon("🗑","Clear Chat");
-        JLabel sets  = hIcon("⚙","Settings");
-        themeToggleBtn.addMouseListener(click(e->toggleTheme()));
-        srch.addMouseListener(click(e->toggleSearch()));
-        save.addMouseListener(click(e->saveChat()));
-        pdf.addMouseListener(click(e->PdfExporter.export(history,this)));
-        clr.addMouseListener(click(e->clearChat()));
-        sets.addMouseListener(click(e->openSettings()));
-        for(JLabel l:new JLabel[]{themeToggleBtn,srch,save,pdf,clr,sets}) right.add(l);
 
-        content.add(left,BorderLayout.WEST);
-        content.add(right,BorderLayout.EAST);
+        themeToggleBtn = iconBtn(AppConfig.isDark() ? "\u2600" : "\uD83C\uDF19", "Toggle Theme");
+        JLabel srchBtn = iconBtn("\uD83D\uDD0D", "Search Chat");
+        JLabel saveBtn = iconBtn("\uD83D\uDCBE", "Save Chat");
+        JLabel pdfBtn  = iconBtn("\uD83D\uDCC4", "Export PDF");
+        JLabel clrBtn  = iconBtn("\uD83D\uDDD1", "Clear Chat");
+        JLabel setBtn  = iconBtn("\u2699", "Settings");
+
+        themeToggleBtn.addMouseListener(click(e -> toggleTheme()));
+        srchBtn.addMouseListener(click(e -> toggleSearch()));
+        saveBtn.addMouseListener(click(e -> saveChat()));
+        pdfBtn.addMouseListener(click(e  -> PdfExporter.export(history, this)));
+        clrBtn.addMouseListener(click(e  -> clearChat()));
+        setBtn.addMouseListener(click(e  -> openSettings()));
+
+        for (JLabel l : new JLabel[]{themeToggleBtn, srchBtn, saveBtn, pdfBtn, clrBtn, setBtn})
+            right.add(l);
+
+        content.add(left,  BorderLayout.WEST);
+        content.add(right, BorderLayout.EAST);
 
         searchBar = buildSearchBar();
-
-        header.setLayout(new BoxLayout(header,BoxLayout.Y_AXIS));
+        header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
         content.setAlignmentX(LEFT_ALIGNMENT);
         searchBar.setAlignmentX(LEFT_ALIGNMENT);
         header.add(content);
@@ -148,340 +174,426 @@ public class ChatBotGUI extends JFrame {
         return header;
     }
 
-    private JLabel buildOrbAvatar() {
+    private JLabel buildRoseOrb() {
         return new JLabel() {
-            float p=0f;
-            { new Timer(45,e->{p+=0.07f;repaint();}).start(); setPreferredSize(new Dimension(40,40)); }
+            float p = 0f;
+            { new Timer(50, e -> { p += 0.06f; repaint(); }).start();
+              setPreferredSize(new Dimension(42, 42)); }
             @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2=(Graphics2D)g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-                float glow=(float)(0.5+0.5*Math.sin(p));
-                g2.setColor(new Color(0,190,165,(int)(35+35*glow))); g2.fillOval(1,1,38,38);
-                RadialGradientPaint c=new RadialGradientPaint(new Point(20,17),14,new float[]{0f,0.55f,1f},
-                    new Color[]{new Color(190,255,242),new Color(0,195,168),new Color(0,95,85)});
-                g2.setPaint(c); g2.fillOval(6,6,28,28);
-                g2.setFont(new Font("Segoe UI",Font.BOLD,13)); g2.setColor(new Color(0,28,22));
-                FontMetrics fm=g2.getFontMetrics(); String s="✦";
-                g2.drawString(s,20-fm.stringWidth(s)/2,25);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                float glow = (float)(0.5 + 0.5 * Math.sin(p));
+
+                // Outer pulse ring
+                g2.setColor(new Color(212, 100, 150, (int)(25 + 25*glow)));
+                g2.fillOval(0, 0, 42, 42);
+
+                // Glass orb — layered
+                RadialGradientPaint core = new RadialGradientPaint(
+                    new Point(21, 18), 16,
+                    new float[]{0f, 0.4f, 0.75f, 1f},
+                    new Color[]{
+                        new Color(255, 220, 235),
+                        new Color(220, 120, 160),
+                        new Color(160, 60, 100),
+                        new Color(80, 20, 50)
+                    });
+                g2.setPaint(core);
+                g2.fillOval(5, 5, 32, 32);
+
+                // Top shimmer
+                g2.setColor(new Color(255, 240, 248, (int)(60 + 40*glow)));
+                g2.fillOval(9, 8, 14, 8);
+
+                // Center symbol
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                g2.setColor(new Color(255, 240, 248, 200));
+                FontMetrics fm = g2.getFontMetrics();
+                String s = "\u2736";
+                g2.drawString(s, 21 - fm.stringWidth(s)/2, 26);
                 g2.dispose();
             }
         };
     }
 
+    private JLabel iconBtn(String icon, String tooltip) {
+        JLabel lbl = new JLabel(icon) {
+            boolean hov = false;
+            { addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent e) { hov=true; repaint(); }
+                public void mouseExited(MouseEvent e)  { hov=false; repaint(); }
+            }); }
+            @Override protected void paintComponent(Graphics g) {
+                if (hov) {
+                    Graphics2D g2 = (Graphics2D)g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    // Rose glow pill on hover
+                    g2.setColor(new Color(212,100,150,35));
+                    g2.fillRoundRect(0,0,getWidth(),getHeight(),12,12);
+                    g2.setColor(new Color(212,100,150,60));
+                    g2.setStroke(new BasicStroke(0.8f));
+                    g2.drawRoundRect(0,0,getWidth()-1,getHeight()-1,12,12);
+                    g2.dispose();
+                }
+                super.paintComponent(g);
+            }
+        };
+        lbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 15));
+        lbl.setToolTipText(tooltip);
+        lbl.setForeground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(),
+                                     AppConfig.ACCENT.getBlue(), 180));
+        lbl.setBorder(new EmptyBorder(5, 8, 5, 8));
+        lbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lbl.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { lbl.setForeground(AppConfig.ACCENT_GLOW); }
+            public void mouseExited(MouseEvent e)  {
+                lbl.setForeground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(),
+                                            AppConfig.ACCENT.getBlue(), 180));
+            }
+        });
+        return lbl;
+    }
+
     private JPanel buildSearchBar() {
-        JPanel bar = new JPanel(new BorderLayout(8,0));
-        bar.setBackground(AppConfig.BG_PANEL());
-        bar.setBorder(new EmptyBorder(6,16,8,16));
+        JPanel bar = new JPanel(new BorderLayout(8, 0)) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D)g.create();
+                g2.setColor(AppConfig.BG_PANEL()); g2.fillRect(0,0,getWidth(),getHeight());
+                g2.dispose();
+            }
+        };
+        bar.setOpaque(false);
+        bar.setBorder(new EmptyBorder(6, 18, 8, 18));
         bar.setVisible(false);
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE,40));
+        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+
         searchField = new JTextField();
         searchField.setFont(AppConfig.FONT_INPUT);
         searchField.setForeground(AppConfig.TEXT_PRIMARY());
         searchField.setBackground(AppConfig.BG_INPUT());
         searchField.setCaretColor(AppConfig.ACCENT_GLOW);
+        searchField.setOpaque(true);
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppConfig.BORDER_SUBTLE(),1,true),
-            new EmptyBorder(5,10,5,10)));
-        JLabel close = hIcon("✕","Close Search");
-        close.addMouseListener(click(e->toggleSearch()));
-        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
-            public void insertUpdate(javax.swing.event.DocumentEvent e){doSearch();}
-            public void removeUpdate(javax.swing.event.DocumentEvent e){doSearch();}
-            public void changedUpdate(javax.swing.event.DocumentEvent e){}
-            void doSearch(){performSearch(searchField.getText());}
+            BorderFactory.createLineBorder(AppConfig.BORDER_SUBTLE(), 1, true),
+            new EmptyBorder(4, 10, 4, 10)));
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e)  { performSearch(searchField.getText()); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e)  { performSearch(searchField.getText()); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {}
         });
-        bar.add(new JLabel("  "),BorderLayout.WEST);
-        bar.add(searchField,BorderLayout.CENTER);
-        bar.add(close,BorderLayout.EAST);
+
+        JLabel close = iconBtn("\u2715", "Close");
+        close.addMouseListener(click(e -> toggleSearch()));
+        bar.add(searchField, BorderLayout.CENTER);
+        bar.add(close, BorderLayout.EAST);
         return bar;
     }
 
-    // ── Chat area with particle background ────────────────────────────────────
+    // ── Chat area ─────────────────────────────────────────────────────────────
 
     private JScrollPane buildChat() {
-        // Particle layer
         particleBg = new ParticleBackground();
         particleBg.setLayout(new BorderLayout());
 
         chatPanel = new JPanel();
-        chatPanel.setLayout(new BoxLayout(chatPanel,BoxLayout.Y_AXIS));
+        chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS));
         chatPanel.setOpaque(false);
-        chatPanel.setBorder(new EmptyBorder(16,12,16,12));
+        chatPanel.setBorder(new EmptyBorder(16, 14, 16, 14));
 
         typingIndicator = new TypingIndicator();
         typingIndicator.setVisible(false);
         typingIndicator.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Wrap chatPanel in a plain bg panel
-        JPanel chatWrapper = new JPanel(new BorderLayout());
-        chatWrapper.setOpaque(false);
-        chatWrapper.add(chatPanel,BorderLayout.NORTH);
-
-        particleBg.add(chatWrapper,BorderLayout.CENTER);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(chatPanel, BorderLayout.NORTH);
+        particleBg.add(wrapper, BorderLayout.CENTER);
 
         scrollPane = new JScrollPane(particleBg);
         scrollPane.setBackground(AppConfig.BG_DARK());
         scrollPane.getViewport().setBackground(AppConfig.BG_DARK());
         scrollPane.getViewport().setOpaque(true);
         scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(18);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
-            @Override protected void configureScrollBarColors(){thumbColor=new Color(0,130,110,100);trackColor=AppConfig.BG_DARK();}
-            @Override protected JButton createIncreaseButton(int o){JButton b=new JButton();b.setPreferredSize(new Dimension(4,0));return b;}
-            @Override protected JButton createDecreaseButton(int o){JButton b=new JButton();b.setPreferredSize(new Dimension(4,0));return b;}
+        scrollPane.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+            @Override protected void configureScrollBarColors() {
+                thumbColor = new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(),
+                                       AppConfig.ACCENT.getBlue(), 80);
+                trackColor = AppConfig.BG_DARK();
+            }
+            @Override protected JButton createIncreaseButton(int o) { return zeroBtn(); }
+            @Override protected JButton createDecreaseButton(int o) { return zeroBtn(); }
+            private JButton zeroBtn() { JButton b=new JButton(); b.setPreferredSize(new Dimension(5,0)); return b; }
         });
-
         particleBg.startAnimation();
         return scrollPane;
     }
 
-    // ── Bottom input ──────────────────────────────────────────────────────────
+    // ── Bottom panel ──────────────────────────────────────────────────────────
 
     private JPanel buildBottom() {
-        JPanel bottom = new JPanel(new BorderLayout()){
-            @Override protected void paintComponent(Graphics g){
-                Graphics2D g2=(Graphics2D)g.create();
+        JPanel bottom = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D)g.create();
                 g2.setColor(AppConfig.BG_PANEL()); g2.fillRect(0,0,getWidth(),getHeight());
-                g2.setColor(new Color(0,155,130,55)); g2.setStroke(new BasicStroke(1f));
-                g2.drawLine(0,0,getWidth(),0); g2.dispose();
+                // Top separator line — rose gold
+                GradientPaint sep = new GradientPaint(0,0,
+                    new Color(AppConfig.ACCENT.getRed(),AppConfig.ACCENT.getGreen(),AppConfig.ACCENT.getBlue(),80),
+                    getWidth()/2,0,
+                    new Color(AppConfig.ACCENT.getRed(),AppConfig.ACCENT.getGreen(),AppConfig.ACCENT.getBlue(),30),
+                    true);
+                g2.setPaint(sep); g2.setStroke(new BasicStroke(1f));
+                g2.drawLine(0,0,getWidth(),0);
+                g2.dispose();
             }
         };
         bottom.setOpaque(false);
-        bottom.setBorder(new EmptyBorder(10,14,16,14));
-        statusLabel=new JLabel("  ✦ ORYN Lumina is ready");
-        statusLabel.setFont(new Font("Segoe UI",Font.PLAIN,11));
-        statusLabel.setForeground(AppConfig.TEXT_SECONDARY());
-        JPanel row=new JPanel(new BorderLayout(10,0));
-        row.setOpaque(false); row.setBorder(new EmptyBorder(7,0,0,0));
-        GlowInputPanel gip=new GlowInputPanel();
-        inputField=gip.getField();
-        inputField.addActionListener(e->handleSend());
-        sendButton=new AnimatedSendButton();
-        sendButton.addActionListener(e->handleSend());
-        row.add(gip,BorderLayout.CENTER);
-        row.add(sendButton,BorderLayout.EAST);
+        bottom.setBorder(new EmptyBorder(10, 16, 16, 16));
+
+        statusLabel = new JLabel("  \u2736 ORYN Rose Noir");
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        statusLabel.setForeground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(),
+                                            AppConfig.ACCENT.getBlue(), 140));
+
         // Suggestion chips
-        suggestionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        suggestionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
         suggestionBar.setOpaque(false);
         suggestionBar.setVisible(false);
 
-        bottom.add(statusLabel,BorderLayout.NORTH);
-        bottom.add(suggestionBar, BorderLayout.CENTER);
-        bottom.add(row,BorderLayout.SOUTH);
-        return bottom;
-    }
+        JPanel inputRow = new JPanel(new BorderLayout(10, 0));
+        inputRow.setOpaque(false);
+        inputRow.setBorder(new EmptyBorder(8, 0, 0, 0));
 
-    void showSuggestions(String[] suggestions) {
-        suggestionBar.removeAll();
-        for (String s : suggestions) {
-            JLabel chip = new JLabel(s);
-            chip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            chip.setForeground(AppConfig.ACCENT);
-            chip.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(), AppConfig.ACCENT.getBlue(), 80), 1, true),
-                new EmptyBorder(3, 10, 3, 10)
-            ));
-            chip.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            chip.setBackground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(), AppConfig.ACCENT.getBlue(), 15));
-            chip.setOpaque(true);
-            chip.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    inputField.setText(s);
-                    handleSend();
-                    suggestionBar.setVisible(false);
-                }
-                public void mouseEntered(MouseEvent e) { chip.setForeground(AppConfig.ACCENT_GLOW); }
-                public void mouseExited(MouseEvent e)  { chip.setForeground(AppConfig.ACCENT); }
-            });
-            suggestionBar.add(chip);
-        }
-        suggestionBar.setVisible(true);
-        suggestionBar.revalidate();
-        suggestionBar.repaint();
+        GlassInputPanel glassInput = new GlassInputPanel();
+        inputField = glassInput.getField();
+        inputField.addActionListener(e -> handleSend());
+
+        sendButton = new RoseButton();
+        sendButton.addActionListener(e -> handleSend());
+
+        inputRow.add(glassInput, BorderLayout.CENTER);
+        inputRow.add(sendButton, BorderLayout.EAST);
+
+        bottom.add(statusLabel,    BorderLayout.NORTH);
+        bottom.add(suggestionBar,  BorderLayout.CENTER);
+        bottom.add(inputRow,       BorderLayout.SOUTH);
+        return bottom;
     }
 
     // ── Chat logic ────────────────────────────────────────────────────────────
 
     private void showWelcome() {
-        SmartChatBot smartBot = (SmartChatBot) bot;
-        chatbot.intelligence.LongMemory mem  = smartBot.getMemory();
-        chatbot.intelligence.BondSystem  bond = smartBot.getBond();
-
-        String welcomeMsg;
-        if (mem.isFirstTodaySession()) {
-            // Daily digest on first open of the day
-            welcomeMsg = chatbot.intelligence.DailyDigest.generate(profile.userName, mem, bond);
-        } else {
-            // Return greeting
-            welcomeMsg = bond.getGreetingFlavour(profile.userName) +
-                "\nType **help** to see what I can do, or just say hi!";
-        }
-        addMsg(new Message(welcomeMsg, Message.Sender.BOT), true);
-        // Show smart suggestions after welcome
-        SwingUtilities.invokeLater(this::showWelcomeSuggestions);
-    }
-
-    private void showWelcomeSuggestions() {
-        showSuggestions(new String[]{"Tell me something interesting", "What can you do?", "Give me a quote"});
+        SmartChatBot sb = (SmartChatBot) bot;
+        LongMemory mem  = sb.getMemory();
+        BondSystem bond = sb.getBond();
+        String msg = mem.isFirstTodaySession()
+            ? DailyDigest.generate(profile.userName, mem, bond)
+            : bond.getGreetingFlavour(profile.userName) + "\nType **help** to see what I can do!";
+        addMsg(new Message(msg, Message.Sender.BOT), true);
+        SwingUtilities.invokeLater(() -> showSuggestions(
+            new String[]{"What can you do?", "Tell me something cool", "Give me a quote"}));
     }
 
     private void handleSend() {
-        String text=inputField.getText().trim();
-        if(text.isBlank()) return;
-        inputField.setText(""); inputField.setEnabled(false); sendButton.setEnabled(false);
-        setStatus("✦ ORYN is thinking...");
+        String text = inputField.getText().trim();
+        if (text.isBlank()) return;
+        inputField.setText("");
+        inputField.setEnabled(false);
+        sendButton.setEnabled(false);
+        setStatus("\u2736 ORYN is thinking...");
         SoundManager.playSend();
-        Message um=new Message(text,Message.Sender.USER);
-        history.add(um); addMsg(um,true); showTyping(true);
-        new SwingWorker<String,Void>(){
+        Message um = new Message(text, Message.Sender.USER);
+        history.add(um); addMsg(um, true); showTyping(true);
+        new SwingWorker<String, Void>() {
             @Override protected String doInBackground() throws Exception {
-                Thread.sleep(AppConfig.TYPING_DELAY_MS); return bot.getReply(text);
+                Thread.sleep(AppConfig.TYPING_DELAY_MS);
+                return bot.getReply(text);
             }
-            @Override protected void done(){
-                try{
-                    String r=get(); showTyping(false);
-                    Message bm=new Message(r,Message.Sender.BOT);
-                    history.add(bm); addMsg(bm,true); SoundManager.playChime();
-                    // Smart suggestions based on reply content
-                    SwingUtilities.invokeLater(()->showSmartSuggestions(r, text));
-                    if(text.equalsIgnoreCase("bye")||text.equalsIgnoreCase("exit")){
-                        Timer t=new Timer(1200,ev->System.exit(0));t.setRepeats(false);t.start();
+            @Override protected void done() {
+                try {
+                    String r = get(); showTyping(false);
+                    Message bm = new Message(r, Message.Sender.BOT);
+                    history.add(bm); addMsg(bm, true); SoundManager.playChime();
+                    SwingUtilities.invokeLater(() -> showSmartSuggestions(r, text));
+                    if (text.equalsIgnoreCase("bye")||text.equalsIgnoreCase("exit")) {
+                        new Timer(1200, ev -> System.exit(0)) {{ setRepeats(false); start(); }};
                     }
-                }catch(Exception ex){showTyping(false);addMsg(new Message("⚠ Error.",Message.Sender.BOT),true);}
-                finally{inputField.setEnabled(true);sendButton.setEnabled(true);inputField.requestFocus();setStatus("  ✦ ORYN Lumina is ready");}
+                } catch (Exception ex) {
+                    showTyping(false);
+                    addMsg(new Message("\u26a0 Something went wrong.", Message.Sender.BOT), true);
+                } finally {
+                    inputField.setEnabled(true); sendButton.setEnabled(true);
+                    inputField.requestFocus(); setStatus("  \u2736 ORYN Rose Noir");
+                }
             }
         }.execute();
     }
 
     private void addMsg(Message msg, boolean animate) {
         chatPanel.remove(typingIndicator);
+        boolean isUser = msg.getSender() == Message.Sender.USER;
 
-        // Reaction row wrapper
         JPanel rowWrap = new JPanel();
-        rowWrap.setLayout(new BoxLayout(rowWrap,BoxLayout.Y_AXIS));
+        rowWrap.setLayout(new BoxLayout(rowWrap, BoxLayout.Y_AXIS));
         rowWrap.setOpaque(false);
         rowWrap.setAlignmentX(Component.LEFT_ALIGNMENT);
-        rowWrap.setMaximumSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
+        rowWrap.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        boolean isUser = msg.getSender()==Message.Sender.USER;
         ORYNBubble bubble = new ORYNBubble(msg);
+
+        // Right-click copy
+        JPopupMenu pop = new JPopupMenu();
+        JMenuItem ci = new JMenuItem("Copy message");
+        ci.addActionListener(e -> {
+            java.awt.datatransfer.StringSelection sel =
+                new java.awt.datatransfer.StringSelection(msg.getText());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, null);
+        });
+        pop.add(ci);
+        bubble.setComponentPopupMenu(pop);
 
         // Bubble row
         JPanel bubbleRow = new JPanel(new BorderLayout());
         bubbleRow.setOpaque(false);
-        if(isUser){ bubbleRow.add(Box.createHorizontalGlue(),BorderLayout.WEST); bubbleRow.add(bubble,BorderLayout.EAST); }
-        else       { bubbleRow.add(bubble,BorderLayout.WEST); bubbleRow.add(Box.createHorizontalGlue(),BorderLayout.EAST); }
+        if (isUser) { bubbleRow.add(Box.createHorizontalGlue(), BorderLayout.WEST); bubbleRow.add(bubble, BorderLayout.EAST); }
+        else        { bubbleRow.add(bubble, BorderLayout.WEST); bubbleRow.add(Box.createHorizontalGlue(), BorderLayout.EAST); }
 
-        // Reaction row
+        // Reaction chips
         JPanel reactions = buildReactionRow(isUser);
         JPanel reactAlign = new JPanel(new BorderLayout());
         reactAlign.setOpaque(false);
-        if(isUser){ reactAlign.add(Box.createHorizontalGlue(),BorderLayout.WEST); reactAlign.add(reactions,BorderLayout.EAST); }
-        else       { reactAlign.add(reactions,BorderLayout.WEST); reactAlign.add(Box.createHorizontalGlue(),BorderLayout.EAST); }
+        if (isUser) { reactAlign.add(Box.createHorizontalGlue(), BorderLayout.WEST); reactAlign.add(reactions, BorderLayout.EAST); }
+        else        { reactAlign.add(reactions, BorderLayout.WEST); reactAlign.add(Box.createHorizontalGlue(), BorderLayout.EAST); }
 
-        // Right-click copy
-        JPopupMenu pop = new JPopupMenu();
-        JMenuItem copyItem = new JMenuItem("Copy message");
-        copyItem.addActionListener(e->{
-            java.awt.datatransfer.StringSelection s = new java.awt.datatransfer.StringSelection(msg.getText());
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(s,null);
-        });
-        pop.add(copyItem);
-        bubble.setComponentPopupMenu(pop);
-
-        rowWrap.add(bubbleRow);
-        rowWrap.add(reactAlign);
-
-        // Hover to show reactions
-        MouseAdapter hov = new MouseAdapter(){
-            public void mouseEntered(MouseEvent e){reactions.setVisible(true);}
-            public void mouseExited(MouseEvent e){if(!rowWrap.contains(e.getPoint()))reactions.setVisible(false);}
+        MouseAdapter hov = new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { reactions.setVisible(true); }
+            public void mouseExited(MouseEvent e)  { if (!rowWrap.contains(e.getPoint())) reactions.setVisible(false); }
         };
         bubble.addMouseListener(hov);
         rowWrap.addMouseListener(hov);
 
+        rowWrap.add(bubbleRow);
+        rowWrap.add(reactAlign);
+
+        // Fade in
+        final float[] alpha = {0f};
         chatPanel.add(rowWrap);
-        chatPanel.add(Box.createVerticalStrut(8));
+        chatPanel.add(Box.createVerticalStrut(10));
         chatPanel.add(typingIndicator);
         chatPanel.revalidate(); chatPanel.repaint(); scrollToBottom();
 
-        if(animate){
-            // Fade in
-            rowWrap.putClientProperty("alpha",0f);
-            Timer ft=new Timer(16,null);
-            ft.addActionListener(e->{
-                Float a=(Float)rowWrap.getClientProperty("alpha");
-                a=Math.min(1f,a+0.09f);
-                rowWrap.putClientProperty("alpha",a);
+        if (animate) {
+            Timer ft = new Timer(16, null);
+            ft.addActionListener(e -> {
+                alpha[0] = Math.min(1f, alpha[0] + 0.09f);
                 rowWrap.repaint();
-                if(a>=1f) ft.stop();
+                if (alpha[0] >= 1f) ft.stop();
             });
+            // Paint with alpha via client property
+            rowWrap.putClientProperty("fadeAlpha", alpha);
             ft.start();
         }
     }
 
     private JPanel buildReactionRow(boolean isUser) {
-        JPanel panel = new JPanel(new FlowLayout(isUser?FlowLayout.RIGHT:FlowLayout.LEFT,3,0));
-        panel.setOpaque(false);
-        panel.setVisible(false);
-        String[] emojis={"👍","❤","😄"};
-        for(String em:emojis){
-            JLabel l=new JLabel(em);
-            l.setFont(new Font("Segoe UI Emoji",Font.PLAIN,13));
+        JPanel p = new JPanel(new FlowLayout(isUser ? FlowLayout.RIGHT : FlowLayout.LEFT, 4, 0));
+        p.setOpaque(false); p.setVisible(false);
+        for (String em : new String[]{"\uD83D\uDC4D", "\u2764", "\uD83D\uDE04"}) {
+            JLabel l = new JLabel(em);
+            l.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 13));
             l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            l.setBorder(new EmptyBorder(1,3,1,3));
-            l.addMouseListener(new MouseAdapter(){
-                boolean on=false;
-                public void mouseClicked(MouseEvent e){
-                    on=!on;
-                    l.setFont(new Font("Segoe UI Emoji",Font.PLAIN,on?16:13));
-                    panel.revalidate();
+            l.setBorder(new EmptyBorder(2, 4, 2, 4));
+            l.addMouseListener(new MouseAdapter() {
+                boolean on = false;
+                public void mouseClicked(MouseEvent e) {
+                    on = !on;
+                    l.setFont(new Font("Segoe UI Emoji", Font.PLAIN, on ? 16 : 13));
+                    p.revalidate();
                 }
             });
-            panel.add(l);
+            p.add(l);
         }
-        return panel;
+        return p;
     }
 
-    private void showTyping(boolean show){
-        if(show) typingIndicator.start(); else typingIndicator.stop();
-        chatPanel.revalidate(); chatPanel.repaint(); scrollToBottom();
+    void showSuggestions(String[] chips) {
+        suggestionBar.removeAll();
+        for (String s : chips) {
+            JLabel chip = new JLabel(s) {
+                boolean hov = false;
+                { addMouseListener(new MouseAdapter() {
+                    public void mouseEntered(MouseEvent e) { hov=true; repaint(); }
+                    public void mouseExited(MouseEvent e)  { hov=false; repaint(); }
+                }); }
+                @Override protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D)g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+                    Color bg = hov ? new Color(212,100,150,50) : new Color(212,100,150,20);
+                    g2.setColor(bg); g2.fillRoundRect(0,0,getWidth(),getHeight(),20,20);
+                    g2.setColor(new Color(212,100,150, hov ? 120 : 70));
+                    g2.setStroke(new BasicStroke(0.8f));
+                    g2.drawRoundRect(0,0,getWidth()-1,getHeight()-1,20,20);
+                    g2.dispose(); super.paintComponent(g);
+                }
+            };
+            chip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            chip.setForeground(AppConfig.ACCENT_BRIGHT);
+            chip.setBorder(new EmptyBorder(4, 12, 4, 12));
+            chip.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            chip.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    inputField.setText(s); handleSend();
+                    suggestionBar.setVisible(false);
+                }
+                public void mouseEntered(MouseEvent e) { chip.setForeground(AppConfig.ACCENT_GLOW); }
+                public void mouseExited(MouseEvent e)  { chip.setForeground(AppConfig.ACCENT_BRIGHT); }
+            });
+            suggestionBar.add(chip);
+        }
+        suggestionBar.setVisible(true);
+        suggestionBar.revalidate(); suggestionBar.repaint();
     }
 
-    private void scrollToBottom(){
-        SwingUtilities.invokeLater(()->{JScrollBar b=scrollPane.getVerticalScrollBar();b.setValue(b.getMaximum());});
-    }
-
-    private void setStatus(String t){statusLabel.setText("  "+t);}
-
-    // ── Actions ───────────────────────────────────────────────────────────────
-
-    private void showSmartSuggestions(String botReply, String userInput) {
-        String lower = userInput.toLowerCase();
+    private void showSmartSuggestions(String reply, String input) {
+        String lo = input.toLowerCase();
         String[] chips;
-        if (lower.contains("joke"))         chips = new String[]{"Tell me another joke", "Give me a quote", "Trivia question"};
-        else if (lower.contains("wiki") || lower.contains("tell me about"))
-                                            chips = new String[]{"Tell me more", "Related topic?", "Give me a trivia"};
-        else if (lower.contains("trivia"))  chips = new String[]{"Another trivia", "Tell me the answer", "Different topic"};
-        else if (lower.contains("weather")) chips = new String[]{"Weather tomorrow?", "Tell me a fact", "What else can you do?"};
-        else if (lower.contains("help"))    chips = new String[]{"Tell me about black holes", "Give me a joke", "What's today's date?"};
-        else if (lower.contains("hello") || lower.contains("hi"))
-                                            chips = new String[]{"What can you do?", "Tell me something cool", "Give me a quote"};
-        else if (lower.contains("debate"))  chips = new String[]{"Debate another topic", "I agree with FOR", "I agree with AGAINST"};
-        else if (lower.contains("score"))   chips = new String[]{"How do I level up?", "Show my interests", "Tell me a trivia"};
-        else                                chips = new String[]{"Tell me more", "Give me a quote", "Trivia question"};
+        if (lo.contains("joke"))          chips = new String[]{"Another joke", "Give me a quote", "Trivia!"};
+        else if (lo.contains("wiki")||lo.contains("tell me about"))
+                                          chips = new String[]{"Tell me more", "Related trivia", "Another topic"};
+        else if (lo.contains("trivia"))   chips = new String[]{"Another trivia", "Wikipedia search", "Give me a fact"};
+        else if (lo.contains("weather"))  chips = new String[]{"Another city?", "Tell me a fact", "Inspire me"};
+        else if (lo.contains("debate"))   chips = new String[]{"Debate another topic", "Give me a quote", "Trivia time"};
+        else if (lo.contains("score")||lo.contains("bond"))
+                                          chips = new String[]{"How do I level up?", "My interests", "Trivia challenge"};
+        else if (lo.contains("help"))     chips = new String[]{"Tell me about AI", "Debate free will", "Knock knock"};
+        else                              chips = new String[]{"Tell me more", "Give me a quote", "Surprise me"};
         showSuggestions(chips);
     }
 
-    private void toggleTheme(){
+    private void showTyping(boolean show) {
+        if (show) typingIndicator.start(); else typingIndicator.stop();
+        chatPanel.revalidate(); chatPanel.repaint(); scrollToBottom();
+    }
+
+    private void scrollToBottom() {
+        SwingUtilities.invokeLater(() -> {
+            JScrollBar b = scrollPane.getVerticalScrollBar(); b.setValue(b.getMaximum());
+        });
+    }
+
+    private void setStatus(String t) { statusLabel.setText("  " + t); }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    private void toggleTheme() {
         AppConfig.setDark(!AppConfig.isDark());
-        profile.darkMode=AppConfig.isDark(); profile.save();
-        themeToggleBtn.setText(AppConfig.isDark()?"☀":"🌙");
+        profile.darkMode = AppConfig.isDark(); profile.save();
+        themeToggleBtn.setText(AppConfig.isDark() ? "\u2600" : "\uD83C\uDF19");
         repaintAll();
     }
 
-    private void repaintAll(){
+    private void repaintAll() {
         getContentPane().setBackground(AppConfig.BG_DARK());
         chatPanel.setBackground(AppConfig.BG_DARK());
         scrollPane.setBackground(AppConfig.BG_DARK());
@@ -489,162 +601,186 @@ public class ChatBotGUI extends JFrame {
         SwingUtilities.updateComponentTreeUI(this); repaint();
     }
 
-    private void toggleSearch(){
+    private void toggleSearch() {
         searchBar.setVisible(!searchBar.isVisible());
         headerPanel.revalidate(); headerPanel.repaint();
-        if(searchBar.isVisible()) searchField.requestFocus();
-        else{ searchField.setText(""); clearHighlight(); }
+        if (searchBar.isVisible()) searchField.requestFocus();
+        else { searchField.setText(""); clearHighlight(); }
     }
 
-    private void performSearch(String q){
+    private void performSearch(String q) {
         clearHighlight();
-        if(q.isBlank()) return;
-        String lq=q.toLowerCase();
-        for(Component c:chatPanel.getComponents())
-            if(c instanceof JPanel p) highlightPanel(p,lq);
+        if (q.isBlank()) return;
+        String lq = q.toLowerCase();
+        for (Component c : chatPanel.getComponents())
+            if (c instanceof JPanel p) findBubbles(p, lq, true);
         chatPanel.repaint();
     }
 
-    private void highlightPanel(JPanel p, String q){
-        for(Component c:p.getComponents()){
-            if(c instanceof ORYNBubble b && b.getMsg().getText().toLowerCase().contains(q))
-                b.setHighlighted(true);
-            if(c instanceof JPanel sub) highlightPanel(sub,q);
-        }
-    }
-
-    private void clearHighlight(){
-        for(Component c:chatPanel.getComponents())
-            if(c instanceof JPanel p) clearPanel(p);
+    private void clearHighlight() {
+        for (Component c : chatPanel.getComponents())
+            if (c instanceof JPanel p) findBubbles(p, null, false);
         chatPanel.repaint();
     }
 
-    private void clearPanel(JPanel p){
-        for(Component c:p.getComponents()){
-            if(c instanceof ORYNBubble b) b.setHighlighted(false);
-            if(c instanceof JPanel sub) clearPanel(sub);
+    private void findBubbles(JPanel p, String q, boolean highlight) {
+        for (Component c : p.getComponents()) {
+            if (c instanceof ORYNBubble b)
+                b.setHighlighted(highlight && q != null && b.getMsg().getText().toLowerCase().contains(q));
+            if (c instanceof JPanel sub) findBubbles(sub, q, highlight);
         }
     }
 
-    private void saveChat(){
-        if(history.isEmpty()){AetherDialog.showInfo(this,"Save Chat","No messages to save yet.");return;}
-        try{String p=ChatHistory.save(history);AetherDialog.showInfo(this,"Saved \u2713","Chat saved to:\n"+p);}
-        catch(IOException ex){AetherDialog.showError(this,"Save Failed",ex.getMessage());}
+    private void saveChat() {
+        if (history.isEmpty()) { AetherDialog.showInfo(this, "Save Chat", "No messages yet."); return; }
+        try { AetherDialog.showInfo(this, "Saved \u2713", "Chat saved to:\n" + ChatHistory.save(history)); }
+        catch (IOException ex) { AetherDialog.showError(this, "Save Failed", ex.getMessage()); }
     }
 
-    private void clearChat(){
-        if(AetherDialog.showConfirm(this,"Clear Chat","Clear all messages? This cannot be undone.")){
+    private void clearChat() {
+        if (AetherDialog.showConfirm(this, "Clear Chat", "Clear all messages?")) {
             history.clear(); chatPanel.removeAll(); chatPanel.add(typingIndicator);
             chatPanel.revalidate(); chatPanel.repaint(); showWelcome();
         }
     }
 
-    private void openSettings(){
-        new SettingsPanel(this,profile,v->{AppConfig.refreshFonts();repaintAll();
-            if(!profile.userName.isEmpty())((SmartChatBot)bot).setUserName(profile.userName);
+    private void openSettings() {
+        new SettingsPanel(this, profile, v -> {
+            AppConfig.refreshFonts(); repaintAll();
+            if (!profile.userName.isEmpty()) ((SmartChatBot)bot).setUserName(profile.userName);
         }).setVisible(true);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private JLabel hIcon(String icon, String tip){
-        JLabel l=new JLabel(icon);
-        l.setFont(new Font("Segoe UI Emoji",Font.PLAIN,15));
-        l.setToolTipText(tip); l.setForeground(AppConfig.TEXT_SECONDARY());
-        l.setBorder(new EmptyBorder(4,7,4,7));
-        l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        l.addMouseListener(new MouseAdapter(){
-            public void mouseEntered(MouseEvent e){l.setForeground(AppConfig.ACCENT_GLOW);}
-            public void mouseExited(MouseEvent e){l.setForeground(AppConfig.TEXT_SECONDARY());}
-        });
-        return l;
+    private MouseAdapter click(java.util.function.Consumer<MouseEvent> h) {
+        return new MouseAdapter() { public void mouseClicked(MouseEvent e) { h.accept(e); } };
     }
 
-    private MouseAdapter click(java.util.function.Consumer<MouseEvent> h){
-        return new MouseAdapter(){public void mouseClicked(MouseEvent e){h.accept(e);}};
-    }
+    // ══════════════════════════════════════════════════════════════════════════
+    // Inner components
+    // ══════════════════════════════════════════════════════════════════════════
 
-    // ── Inner: GlowInputPanel ─────────────────────────────────────────────────
-
-    static class GlowInputPanel extends JPanel {
+    /** Rose Noir glassmorphism input field */
+    static class GlassInputPanel extends JPanel {
         private final JTextField field;
-        private boolean focused=false;
-        private float gp=0f;
+        private boolean focused = false;
+        private float gp = 0f;
         private final Timer pt;
 
-        GlowInputPanel(){
+        GlassInputPanel() {
             setOpaque(false); setLayout(new BorderLayout());
-            field=new JTextField();
-            field.setFont(AppConfig.FONT_INPUT); field.setForeground(AppConfig.TEXT_PRIMARY());
-            field.setBackground(AppConfig.BG_INPUT()); field.setCaretColor(AppConfig.ACCENT_GLOW);
-            field.setBorder(new EmptyBorder(10,14,10,14)); field.setOpaque(false);
-            add(field,BorderLayout.CENTER); setBorder(new EmptyBorder(2,0,2,0));
-            pt=new Timer(40,e->{gp+=0.1f;repaint();});
-            field.addFocusListener(new FocusAdapter(){
-                public void focusGained(FocusEvent e){focused=true;pt.start();}
-                public void focusLost(FocusEvent e){focused=false;pt.stop();repaint();}
+            field = new JTextField();
+            field.setFont(AppConfig.FONT_INPUT);
+            field.setForeground(AppConfig.TEXT_PRIMARY());
+            field.setBackground(new Color(0,0,0,0));
+            field.setCaretColor(AppConfig.ACCENT_GLOW);
+            field.setBorder(new EmptyBorder(10, 16, 10, 16));
+            field.setOpaque(false);
+            add(field, BorderLayout.CENTER);
+            setBorder(new EmptyBorder(2,0,2,0));
+            pt = new Timer(40, e -> { gp += 0.1f; repaint(); });
+            field.addFocusListener(new FocusAdapter() {
+                public void focusGained(FocusEvent e) { focused=true; pt.start(); }
+                public void focusLost(FocusEvent e)   { focused=false; pt.stop(); repaint(); }
             });
         }
 
-        JTextField getField(){return field;}
+        JTextField getField() { return field; }
 
-        @Override protected void paintComponent(Graphics g){
-            Graphics2D g2=(Graphics2D)g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-            int r=24;
-            g2.setColor(AppConfig.BG_INPUT()); g2.fillRoundRect(0,0,getWidth(),getHeight(),r,r);
-            if(focused){
-                float gl=(float)(0.4+0.6*Math.abs(Math.sin(gp)));
-                g2.setColor(new Color(0,195,168,(int)(75+105*gl)));
-                g2.setStroke(new BasicStroke(2f)); g2.drawRoundRect(1,1,getWidth()-2,getHeight()-2,r,r);
-                g2.setColor(new Color(0,195,168,(int)(18*gl)));
-                g2.setStroke(new BasicStroke(5f)); g2.drawRoundRect(-1,-1,getWidth()+1,getHeight()+1,r+3,r+3);
-            }else{
-                g2.setColor(AppConfig.BORDER_SUBTLE()); g2.setStroke(new BasicStroke(1f));
-                g2.drawRoundRect(0,0,getWidth()-1,getHeight()-1,r,r);
+        @Override protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D)g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int r = 26;
+            int w = getWidth(), h = getHeight();
+
+            // Glass base
+            g2.setColor(AppConfig.BG_INPUT());
+            g2.fillRoundRect(0, 0, w, h, r, r);
+
+            // Top shimmer
+            GradientPaint sh = new GradientPaint(0,0,new Color(255,200,220,20),0,h/2,new Color(0,0,0,0));
+            g2.setPaint(sh); g2.fillRoundRect(0,0,w,h,r,r);
+
+            if (focused) {
+                float gl = (float)(0.4 + 0.6 * Math.abs(Math.sin(gp)));
+                // Inner rose glow border
+                g2.setColor(new Color(212, 100, 150, (int)(90 + 110*gl)));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawRoundRect(1,1,w-2,h-2,r,r);
+                // Outer soft glow
+                g2.setColor(new Color(212, 100, 150, (int)(15*gl)));
+                g2.setStroke(new BasicStroke(5f));
+                g2.drawRoundRect(-1,-1,w+1,h+1,r+3,r+3);
+            } else {
+                g2.setColor(AppConfig.BORDER_SUBTLE());
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawRoundRect(0,0,w-1,h-1,r,r);
             }
             g2.dispose(); super.paintComponent(g);
         }
 
-        @Override public Dimension getPreferredSize(){return new Dimension(super.getPreferredSize().width,46);}
+        @Override public Dimension getPreferredSize() {
+            return new Dimension(super.getPreferredSize().width, 48);
+        }
     }
 
-    // ── Inner: AnimatedSendButton ─────────────────────────────────────────────
+    /** Rose gold animated send button */
+    static class RoseButton extends JButton {
+        private float ha = 0f;
+        private boolean hov = false;
+        private Timer at;
 
-    static class AnimatedSendButton extends JButton {
-        private float ha=0f; private boolean hov=false; private Timer at;
-
-        AnimatedSendButton(){
-            super("Send \u27A4");
-            setFont(AppConfig.FONT_BUTTON); setForeground(Color.WHITE);
-            setContentAreaFilled(false); setFocusPainted(false);
-            setBorder(new EmptyBorder(10,22,10,22));
+        RoseButton() {
+            super("Send");
+            setFont(AppConfig.FONT_BUTTON);
+            setForeground(Color.WHITE);
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorder(new EmptyBorder(10, 24, 10, 24));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            addMouseListener(new MouseAdapter(){
-                public void mouseEntered(MouseEvent e){hov=true;anim();}
-                public void mouseExited(MouseEvent e){hov=false;anim();}
+            addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent e) { hov=true; anim(); }
+                public void mouseExited(MouseEvent e)  { hov=false; anim(); }
             });
         }
 
-        private void anim(){
-            if(at!=null)at.stop();
-            at=new Timer(16,e->{
-                ha+=hov?0.1f:-0.1f; ha=Math.max(0f,Math.min(1f,ha)); repaint();
-                if((!hov&&ha<=0)||(hov&&ha>=1))at.stop();
+        private void anim() {
+            if (at != null) at.stop();
+            at = new Timer(16, e -> {
+                ha += hov ? 0.1f : -0.1f;
+                ha = Math.max(0f, Math.min(1f, ha));
+                repaint();
+                if ((!hov && ha <= 0) || (hov && ha >= 1)) at.stop();
             });
             at.start();
         }
 
-        @Override protected void paintComponent(Graphics g){
-            Graphics2D g2=(Graphics2D)g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-            int r=24,w=getWidth(),h=getHeight();
-            Color c=new Color(Math.min(255,(int)(0+ha*195)),Math.max(0,(int)(168+ha*(128-168))),Math.max(0,(int)(138+ha*(0-138))));
-            g2.setColor(new Color(0,0,0,55)); g2.fillRoundRect(2,3,w-2,h-2,r,r);
-            g2.setPaint(new GradientPaint(0,0,c.brighter(),w,h,c.darker()));
-            g2.fillRoundRect(0,0,w-1,h-1,r,r);
-            if(ha>0.05f){g2.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),(int)(55*ha)));g2.setStroke(new BasicStroke(3f));g2.drawRoundRect(-1,-1,w+1,h+1,r+2,r+2);}
-            g2.setColor(new Color(255,255,255,28)); g2.fillRoundRect(3,3,w-6,h/2-3,r-4,r-4);
+        @Override protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D)g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int r = 26, w = getWidth(), h = getHeight();
+
+            // Interpolate rose → gold on hover
+            int red   = (int)(180 + ha * 50);
+            int green = (int)(80  + ha * 100);
+            int blue  = (int)(120 + ha * (-40));
+            Color c = new Color(Math.min(255,red), Math.min(255,Math.max(0,green)), Math.max(0,blue));
+
+            // Shadow
+            g2.setColor(new Color(0,0,0,60)); g2.fillRoundRect(2,3,w-2,h-2,r,r);
+
+            // Glass gradient fill
+            GradientPaint fill = new GradientPaint(0,0,c.brighter(),w,h,c.darker());
+            g2.setPaint(fill); g2.fillRoundRect(0,0,w-1,h-1,r,r);
+
+            // Top shimmer
+            g2.setColor(new Color(255,255,255,35)); g2.fillRoundRect(3,3,w-6,h/2-3,r-4,r-4);
+
+            // Glow ring on hover
+            if (ha > 0.05f) {
+                g2.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),(int)(50*ha)));
+                g2.setStroke(new BasicStroke(3f));
+                g2.drawRoundRect(-1,-1,w+1,h+1,r+2,r+2);
+            }
             g2.dispose(); super.paintComponent(g);
         }
     }

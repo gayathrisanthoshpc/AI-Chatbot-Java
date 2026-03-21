@@ -73,14 +73,13 @@ public class ParticleBackground extends JPanel {
             alphaDir = rng.nextBoolean() ? 0.002f : -0.002f;
 
             // Teal or amber particles to match Aether palette
-            if (rng.nextBoolean()) {
-                color = AppConfig.isDark()
-                    ? new Color(0, 200, 170)
-                    : new Color(0, 160, 140);
+            int pick = rng.nextInt(3);
+            if (pick == 0) {
+                color = new Color(212, 100, 150); // rose
+            } else if (pick == 1) {
+                color = new Color(230, 170, 100); // gold
             } else {
-                color = AppConfig.isDark()
-                    ? new Color(220, 160, 40)
-                    : new Color(200, 130, 20);
+                color = new Color(180, 80, 130);  // deep rose
             }
         }
 

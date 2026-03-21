@@ -40,9 +40,9 @@ public class TypingIndicator extends JPanel {
         // Bubble background
         int bubbleW = DOT_COUNT * (DOT_SIZE + DOT_SPACING) + DOT_SPACING + 8;
         int bubbleH = DOT_SIZE + 18;
-        g2.setColor(AppConfig.BG_BOT_BUBBLE());
+        g2.setColor(new java.awt.Color(30,20,38,200));
         g2.fillRoundRect(8, 4, bubbleW, bubbleH, 14, 14);
-        g2.setColor(AppConfig.BORDER_SUBTLE());
+        g2.setColor(new java.awt.Color(212,100,150,60));
         g2.setStroke(new BasicStroke(0.8f));
         g2.drawRoundRect(8, 4, bubbleW, bubbleH, 14, 14);
 
@@ -52,9 +52,9 @@ public class TypingIndicator extends JPanel {
         for (int i = 0; i < DOT_COUNT; i++) {
             float alpha = (i == activeDot) ? 1.0f : 0.3f;
             g2.setColor(new Color(
-                AppConfig.ACCENT_GLOW.getRed(),
-                AppConfig.ACCENT_GLOW.getGreen(),
-                AppConfig.ACCENT_GLOW.getBlue(),
+                AppConfig.ACCENT_BRIGHT.getRed(),
+                AppConfig.ACCENT_BRIGHT.getGreen(),
+                AppConfig.ACCENT_BRIGHT.getBlue(),
                 (int)(alpha * 255)
             ));
             g2.fill(new Ellipse2D.Float(startX + i * (DOT_SIZE + DOT_SPACING), dotY, DOT_SIZE, DOT_SIZE));

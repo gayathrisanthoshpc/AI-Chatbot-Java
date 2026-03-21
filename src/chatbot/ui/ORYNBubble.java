@@ -5,168 +5,165 @@ import chatbot.util.AppConfig;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.TextAttribute;
 import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * ORYN Trademark Bubble — unique conversation style:
- * • Sender name + timestamp on same line above bubble
- * • Glowing left-edge accent bar (ORYN=teal, User=amber)
- * • Asymmetric rounded corners (top fully round, opposite bottom slightly sharp)
- * • Frosted glass inner glow
- * • Proper emoji rendering via font fallback
- * • **bold** markdown rendered as actual bold
- * • Proper line breaks
+ * ORYN Rose Noir Glassmorphism Bubble
+ * - Frosted glass effect via layered semi-transparent fills
+ * - Inner shimmer highlight at top
+ * - Rose gold / warm gold gradient border
+ * - Proper emoji rendering via font fallback chain
+ * - Bold markdown rendering
+ * - Sender name + time header
+ * - Asymmetric ORYN-signature corner radius
  */
 public class ORYNBubble extends JPanel {
 
     private final Message msg;
     private final boolean isUser;
-    private static final int BAR_WIDTH   = 3;
-    private static final int CORNER_BIG  = 20;
-    private static final int CORNER_SML  = 6;
-    private static final int PAD_H       = 14;
-    private static final int PAD_V       = 11;
-    private static final int MAX_WIDTH   = 400;
-    private static final int LINE_GAP    = 4;
-
-    // Emoji-aware font chain
-    private static final Font FONT_EMOJI = new Font("Segoe UI Emoji", Font.PLAIN, 15);
-    private static final Font FONT_BASE  = new Font("Segoe UI", Font.PLAIN, 15);
-    private static final Font FONT_BOLD  = new Font("Segoe UI", Font.BOLD,  15);
-    private static final Font FONT_MONO  = new Font("Consolas",  Font.PLAIN, 13);
-    private static final Font FONT_NAME  = new Font("Segoe UI", Font.BOLD,  11);
-    private static final Font FONT_TIME  = new Font("Segoe UI", Font.PLAIN, 10);
-
     private boolean highlighted = false;
 
-    public Message getMsg()              { return msg; }
-    public void setHighlighted(boolean h){ this.highlighted = h; repaint(); }
+    private static final int PAD_H      = 16;
+    private static final int PAD_V      = 12;
+    private static final int LINE_GAP   = 5;
+    private static final int NAME_ROW_H = 20;
+
+    // Font chain for proper emoji
+    private static final String[] FONT_NAMES = {"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Segoe UI"};
+
+    public Message getMsg()               { return msg; }
+    public void setHighlighted(boolean h) { this.highlighted = h; repaint(); }
 
     public ORYNBubble(Message msg) {
         this.msg    = msg;
         this.isUser = msg.getSender() == Message.Sender.USER;
         setOpaque(false);
-        setMaximumSize(new Dimension(MAX_WIDTH + 60, 2000));
+        setMaximumSize(new Dimension(AppConfig.MAX_BUBBLE_WIDTH + 60, 3000));
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING,         RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,       RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,  RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING,          RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,  RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        // ── Layout measurements ───────────────────────────────────────────────
-        List<List<Segment>> lines = parseLines(msg.getText());
-
-        FontMetrics fmBase = g2.getFontMetrics(FONT_BASE);
+        // ── Measure text ──────────────────────────────────────────────────────
+        List<List<Segment>> paragraphs = parseText(msg.getText());
+        Font baseFont = AppConfig.FONT_MESSAGE;
+        Font boldFont = new Font(baseFont.getName(), Font.BOLD, baseFont.getSize());
+        FontMetrics fmBase = g2.getFontMetrics(baseFont);
         int lineH  = fmBase.getHeight() + LINE_GAP;
         int ascent = fmBase.getAscent();
 
-        // Calculate bubble width
         int contentW = 0;
-        for (List<Segment> line : lines) {
-            int lw = lineWidth(g2, line);
-            contentW = Math.max(contentW, lw);
+        for (List<Segment> para : paragraphs) {
+            contentW = Math.max(contentW, measureLine(g2, para, baseFont, boldFont));
         }
-        contentW = Math.min(contentW, MAX_WIDTH);
+        contentW = Math.min(contentW, AppConfig.MAX_BUBBLE_WIDTH);
+        contentW = Math.max(contentW, 80);
 
-        int bubbleW = contentW + PAD_H * 2 + BAR_WIDTH + 6;
-        int bubbleH = lines.size() * lineH + PAD_V * 2 + 4;
+        FontMetrics fmTime = g2.getFontMetrics(AppConfig.FONT_TIMESTAMP);
+        int timeW   = fmTime.stringWidth(msg.getTimestamp());
+        int bubbleW = Math.max(contentW, timeW + 20) + PAD_H * 2;
+        int bubbleH = paragraphs.size() * lineH + PAD_V * 2 + 6;
+        int totalH  = NAME_ROW_H + bubbleH + 6;
 
-        // Name + time row height
-        int nameRowH = 18;
-        int totalH   = nameRowH + bubbleH + 4;
         setPreferredSize(new Dimension(bubbleW + 4, totalH));
 
         int bx = isUser ? getWidth() - bubbleW - 2 : 2;
-        int by = nameRowH;
+        int by = NAME_ROW_H;
 
-        // ── Name + Timestamp row ──────────────────────────────────────────────
+        // ── Sender name + timestamp ────────────────────────────────────────────
         String senderName = isUser ? "You" : AppConfig.BOT_NAME;
-        Color  nameColor  = isUser ? AppConfig.ACCENT_AMBER : AppConfig.ACCENT;
-
-        g2.setFont(FONT_NAME);
+        Color  nameColor  = isUser ? AppConfig.ACCENT_GOLD : AppConfig.ACCENT_BRIGHT;
+        g2.setFont(AppConfig.FONT_LABEL);
         g2.setColor(nameColor);
-        int nameX = isUser ? bx + bubbleW - g2.getFontMetrics().stringWidth(senderName) - BAR_WIDTH - 4 : bx + BAR_WIDTH + PAD_H;
-        g2.drawString(senderName, nameX, nameRowH - 4);
+        FontMetrics fmLabel = g2.getFontMetrics(AppConfig.FONT_LABEL);
+        int nameX = isUser ? bx + bubbleW - fmLabel.stringWidth(senderName) - PAD_H : bx + PAD_H;
+        g2.drawString(senderName, nameX, NAME_ROW_H - 5);
 
-        g2.setFont(FONT_TIME);
+        g2.setFont(AppConfig.FONT_TIMESTAMP);
         g2.setColor(AppConfig.TEXT_SECONDARY());
-        String time = msg.getTimestamp();
-        int timeW = g2.getFontMetrics().stringWidth(time);
-        int timeX = isUser ? bx + bubbleW - g2.getFontMetrics().stringWidth(senderName) - timeW - 12 - BAR_WIDTH
-                           : nameX + g2.getFontMetrics(FONT_NAME).stringWidth(senderName) + 8;
-        g2.drawString(time, timeX, nameRowH - 4);
+        FontMetrics fmTs = g2.getFontMetrics(AppConfig.FONT_TIMESTAMP);
+        int tsX = isUser
+            ? nameX - fmTs.stringWidth(msg.getTimestamp()) - 8
+            : nameX + fmLabel.stringWidth(senderName) + 8;
+        g2.drawString(msg.getTimestamp(), tsX, NAME_ROW_H - 5);
 
-        // ── Drop shadow ───────────────────────────────────────────────────────
-        for (int i = 3; i >= 1; i--) {
-            g2.setColor(new Color(0, 0, 0, 8 * i));
-            g2.fill(makeShape(bx + i, by + i, bubbleW, bubbleH));
+        // ── Multi-layer shadow ────────────────────────────────────────────────
+        for (int i = 4; i >= 1; i--) {
+            g2.setColor(new Color(0, 0, 0, 6 * i));
+            g2.fill(makeGlassShape(bx + i, by + i, bubbleW, bubbleH));
         }
 
-        // ── Bubble fill ───────────────────────────────────────────────────────
-        Color base = isUser ? AppConfig.BG_USER_BUBBLE() : AppConfig.BG_BOT_BUBBLE();
-        GradientPaint fill = isUser
-            ? new GradientPaint(bx, by, base, bx + bubbleW, by + bubbleH, base.darker())
-            : new GradientPaint(bx, by, base, bx + bubbleW, by + bubbleH,
-                new Color(Math.max(0, base.getRed()-8), Math.max(0, base.getGreen()-5), Math.max(0, base.getBlue()-5)));
-        g2.setPaint(fill);
-        g2.fill(makeShape(bx, by, bubbleW, bubbleH));
+        // ── Glass base fill ───────────────────────────────────────────────────
+        Color baseColor = isUser ? AppConfig.BG_USER_BUBBLE() : AppConfig.BG_BOT_BUBBLE();
+        g2.setColor(baseColor);
+        g2.fill(makeGlassShape(bx, by, bubbleW, bubbleH));
 
-        // ── Inner top glow (frosted feel) ─────────────────────────────────────
-        if (!isUser) {
-            GradientPaint frost = new GradientPaint(bx, by, new Color(0, 200, 170, 18), bx, by + bubbleH / 2, new Color(0,0,0,0));
-            g2.setPaint(frost);
-            g2.fill(makeShape(bx, by, bubbleW, bubbleH));
-        }
+        // ── Inner gradient shimmer (top highlight — the "glass" look) ─────────
+        Color shimmerTop = isUser
+            ? new Color(255, 200, 220, 45)
+            : new Color(220, 160, 190, 35);
+        Color shimmerBot = new Color(0, 0, 0, 0);
+        GradientPaint shimmer = new GradientPaint(
+            bx, by, shimmerTop,
+            bx, by + bubbleH * 0.45f, shimmerBot
+        );
+        g2.setPaint(shimmer);
+        g2.fill(makeGlassShape(bx, by, bubbleW, bubbleH));
 
-        // ── Border ────────────────────────────────────────────────────────────
-        Color borderColor = isUser ? new Color(220, 150, 40, 80) : new Color(0, 180, 155, 70);
-        g2.setColor(borderColor);
-        g2.setStroke(new BasicStroke(0.8f));
-        g2.draw(makeShape(bx, by, bubbleW, bubbleH));
+        // ── Left/right inner edge glow strip ──────────────────────────────────
+        Color edgeColor = isUser
+            ? new Color(255, 180, 200, 50)
+            : new Color(212, 120, 155, 40);
+        int edgeX = isUser ? bx + bubbleW - 3 : bx;
+        GradientPaint edgeGrad = new GradientPaint(
+            edgeX, by, edgeColor,
+            edgeX, by + bubbleH, new Color(edgeColor.getRed(), edgeColor.getGreen(), edgeColor.getBlue(), 10)
+        );
+        g2.setPaint(edgeGrad);
+        g2.fillRect(edgeX, by + AppConfig.BUBBLE_RADIUS/2, 3, bubbleH - AppConfig.BUBBLE_RADIUS);
 
-        // ── Highlight overlay ────────────────────────────────────────────────────
+        // ── Glass border — rose gold gradient ─────────────────────────────────
         if (highlighted) {
-            g2.setColor(new Color(0, 200, 170, 30));
-            g2.fill(makeShape(bx, by, bubbleW, bubbleH));
-            g2.setColor(new Color(0, 220, 180, 120));
+            g2.setColor(new Color(255, 180, 210, 180));
             g2.setStroke(new BasicStroke(2f));
-            g2.draw(makeShape(bx, by, bubbleW, bubbleH));
+        } else {
+            Color b1 = isUser ? new Color(255, 160, 190, 100) : new Color(212, 120, 155, 70);
+            Color b2 = isUser ? new Color(230, 180, 120, 60)  : new Color(180, 80, 120, 40);
+            GradientPaint borderPaint = new GradientPaint(bx, by, b1, bx + bubbleW, by + bubbleH, b2);
+            g2.setPaint(borderPaint);
+            g2.setStroke(new BasicStroke(1f));
         }
+        g2.draw(makeGlassShape(bx, by, bubbleW, bubbleH));
 
-        // ── Accent edge bar ───────────────────────────────────────────────────
-        Color barColor = isUser ? AppConfig.ACCENT_AMBER : AppConfig.ACCENT;
-        int barX = isUser ? bx + bubbleW - BAR_WIDTH : bx;
-        GradientPaint barGrad = new GradientPaint(barX, by, barColor, barX, by + bubbleH, new Color(barColor.getRed(), barColor.getGreen(), barColor.getBlue(), 80));
-        g2.setPaint(barGrad);
-        int barR = isUser ? CORNER_SML : CORNER_BIG;
-        g2.fillRoundRect(barX, by, BAR_WIDTH, bubbleH, barR, barR);
+        // ── Top shimmer line ──────────────────────────────────────────────────
+        g2.setColor(isUser ? new Color(255, 200, 220, 80) : new Color(255, 170, 200, 55));
+        g2.setStroke(new BasicStroke(0.8f));
+        int r = AppConfig.BUBBLE_RADIUS;
+        g2.drawLine(bx + r, by + 1, bx + bubbleW - r, by + 1);
 
         // ── Text rendering ────────────────────────────────────────────────────
-        int textX = bx + BAR_WIDTH + PAD_H + (isUser ? 0 : 2);
+        int textX = bx + PAD_H;
         int textY = by + PAD_V + ascent;
+        Color textColor = isUser ? AppConfig.TEXT_USER() : AppConfig.TEXT_PRIMARY();
 
-        for (List<Segment> line : lines) {
+        for (List<Segment> para : paragraphs) {
             int cx = textX;
-            for (Segment seg : line) {
-                Font  f = seg.bold ? FONT_BOLD : FONT_BASE;
-                g2.setFont(f);
-                g2.setColor(isUser ? AppConfig.TEXT_USER() : AppConfig.TEXT_PRIMARY());
-
-                // Render char by char with emoji fallback
+            for (Segment seg : para) {
+                Font f = seg.bold ? boldFont : baseFont;
                 for (int ci = 0; ci < seg.text.length(); ) {
                     int cp = seg.text.codePointAt(ci);
                     String ch = new String(Character.toChars(cp));
-                    Font chosen = isEmoji(cp) ? FONT_EMOJI : f;
+                    Font chosen = pickFont(cp, f);
                     g2.setFont(chosen);
+                    g2.setColor(textColor);
                     g2.drawString(ch, cx, textY);
                     cx += g2.getFontMetrics(chosen).stringWidth(ch);
                     ci += Character.charCount(cp);
@@ -178,37 +175,44 @@ public class ORYNBubble extends JPanel {
         g2.dispose();
     }
 
-    // ── Asymmetric rounded shape ──────────────────────────────────────────────
+    // ── ORYN Signature Glass Shape ────────────────────────────────────────────
+    // Top corners = fully round, opposite bottom corner = slightly sharp
+    private Shape makeGlassShape(int x, int y, int w, int h) {
+        int r  = AppConfig.BUBBLE_RADIUS;
+        int rs = 6; // sharp corner radius
+        Path2D p = new Path2D.Float();
 
-    private Shape makeShape(int x, int y, int w, int h) {
-        // ORYN Trademark: top corners both round, bottom-near-bar corner sharp
-        Path2D path = new Path2D.Float();
-        int tl = isUser ? CORNER_BIG : CORNER_BIG;  // top-left
-        int tr = isUser ? CORNER_BIG : CORNER_BIG;  // top-right
-        int br = isUser ? CORNER_SML : CORNER_BIG;  // bottom-right (sharp for user = near bar)
-        int bl = isUser ? CORNER_BIG : CORNER_SML;  // bottom-left (sharp for bot = near bar)
-
-        path.moveTo(x + tl, y);
-        path.lineTo(x + w - tr, y);
-        path.quadTo(x + w, y, x + w, y + tr);
-        path.lineTo(x + w, y + h - br);
-        path.quadTo(x + w, y + h, x + w - br, y + h);
-        path.lineTo(x + bl, y + h);
-        path.quadTo(x, y + h, x, y + h - bl);
-        path.lineTo(x, y + tl);
-        path.quadTo(x, y, x + tl, y);
-        path.closePath();
-        return path;
+        if (isUser) {
+            // User: sharp bottom-right
+            p.moveTo(x + r, y);
+            p.quadTo(x + w, y, x + w, y + r);        // top-right round
+            p.lineTo(x + w, y + h - rs);
+            p.quadTo(x + w, y + h, x + w - rs, y + h); // bottom-right sharp
+            p.lineTo(x + r, y + h);
+            p.quadTo(x, y + h, x, y + h - r);         // bottom-left round
+            p.lineTo(x, y + r);
+            p.quadTo(x, y, x + r, y);                  // top-left round
+        } else {
+            // ORYN: sharp bottom-left
+            p.moveTo(x + r, y);
+            p.quadTo(x + w, y, x + w, y + r);          // top-right round
+            p.lineTo(x + w, y + h - r);
+            p.quadTo(x + w, y + h, x + w - r, y + h);  // bottom-right round
+            p.lineTo(x + rs, y + h);
+            p.quadTo(x, y + h, x, y + h - rs);          // bottom-left sharp
+            p.lineTo(x, y + r);
+            p.quadTo(x, y, x + r, y);                   // top-left round
+        }
+        p.closePath();
+        return p;
     }
 
-    // ── Text parsing — bold + line breaks ────────────────────────────────────
+    // ── Text parsing ──────────────────────────────────────────────────────────
 
-    private List<List<Segment>> parseLines(String text) {
+    private List<List<Segment>> parseText(String text) {
         List<List<Segment>> result = new ArrayList<>();
-        String[] rawLines = text.replace("\\n", "\n").split("\n", -1);
-        for (String raw : rawLines) {
-            result.add(parseSegments(raw));
-        }
+        String[] lines = text.replace("\\n", "\n").split("\n", -1);
+        for (String line : lines) result.add(parseSegments(line));
         return result;
     }
 
@@ -218,49 +222,52 @@ public class ORYNBubble extends JPanel {
         while (i < line.length()) {
             if (line.startsWith("**", i)) {
                 int end = line.indexOf("**", i + 2);
-                if (end != -1) {
-                    segs.add(new Segment(line.substring(i + 2, end), true));
-                    i = end + 2;
-                } else {
-                    segs.add(new Segment(line.substring(i), false));
-                    break;
-                }
-            } else {
-                int next = line.indexOf("**", i);
-                String chunk = next == -1 ? line.substring(i) : line.substring(i, next);
-                if (!chunk.isEmpty()) segs.add(new Segment(chunk, false));
-                i = next == -1 ? line.length() : next;
+                if (end != -1) { segs.add(new Segment(line.substring(i+2, end), true)); i = end+2; continue; }
             }
+            int next = line.indexOf("**", i);
+            String chunk = next == -1 ? line.substring(i) : line.substring(i, next);
+            if (!chunk.isEmpty()) segs.add(new Segment(chunk, false));
+            if (next == -1) break;
+            i = next;
         }
         if (segs.isEmpty()) segs.add(new Segment("", false));
         return segs;
     }
 
-    private int lineWidth(Graphics2D g2, List<Segment> segs) {
+    private int measureLine(Graphics2D g2, List<Segment> segs, Font base, Font bold) {
         int w = 0;
         for (Segment seg : segs) {
-            Font f = seg.bold ? FONT_BOLD : FONT_BASE;
+            Font f = seg.bold ? bold : base;
             for (int ci = 0; ci < seg.text.length(); ) {
                 int cp = seg.text.codePointAt(ci);
                 String ch = new String(Character.toChars(cp));
-                Font chosen = isEmoji(cp) ? FONT_EMOJI : f;
-                w += g2.getFontMetrics(chosen).stringWidth(ch);
+                w += g2.getFontMetrics(pickFont(cp, f)).stringWidth(ch);
                 ci += Character.charCount(cp);
             }
         }
         return w;
     }
 
+    // Pick best font for this codepoint
+    private Font pickFont(int cp, Font base) {
+        if (isEmoji(cp)) {
+            for (String name : FONT_NAMES) {
+                Font f = new Font(name, Font.PLAIN, base.getSize());
+                if (f.canDisplay(cp)) return f;
+            }
+        }
+        return base;
+    }
+
     private boolean isEmoji(int cp) {
-        return (cp >= 0x1F000 && cp <= 0x1FFFF) ||
-               (cp >= 0x2600  && cp <= 0x27BF)  ||
-               (cp >= 0xFE00  && cp <= 0xFE0F)  ||
-               (cp >= 0x2300  && cp <= 0x23FF);
+        return (cp >= 0x1F000 && cp <= 0x1FFFF) || (cp >= 0x2600 && cp <= 0x27BF)
+            || (cp >= 0xFE00 && cp <= 0xFE0F)   || (cp >= 0x2300 && cp <= 0x23FF)
+            || (cp >= 0x1F300 && cp <= 0x1F9FF);
     }
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(MAX_WIDTH + 10, 80);
+        return new Dimension(AppConfig.MAX_BUBBLE_WIDTH + 20, 80);
     }
 
     private record Segment(String text, boolean bold) {}

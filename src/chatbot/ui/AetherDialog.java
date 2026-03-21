@@ -61,7 +61,7 @@ public class AetherDialog extends JDialog {
         };
         Color iconColor = switch (type) {
             case INFO    -> AppConfig.ACCENT;
-            case CONFIRM -> AppConfig.ACCENT_AMBER;
+            case CONFIRM -> AppConfig.ACCENT_GOLD;
             case ERROR   -> new Color(220, 80, 80);
         };
 
