@@ -5,6 +5,7 @@ import chatbot.service.ChatService;
 import chatbot.service.SmartChatBot;
 import chatbot.util.*;
 import chatbot.intelligence.*;
+import chatbot.ui.ORYNIcon;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -77,19 +78,32 @@ public class ChatBotGUI extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // Deep dark base
-                g2.setColor(AppConfig.isDark() ? new Color(12, 8, 16) : new Color(248, 240, 252));
-                g2.fillRect(0, 0, getWidth(), getHeight());
-
-                // Rose glow — left orb
-                RadialGradientPaint rg = new RadialGradientPaint(new Point(70, getHeight()/2), 90,
-                    new float[]{0f,1f}, new Color[]{new Color(212,100,150,55), new Color(212,100,150,0)});
-                g2.setPaint(rg); g2.fillOval(-20,-30,180,getHeight()+60);
-
-                // Gold glow — right orb
-                RadialGradientPaint gg = new RadialGradientPaint(new Point(getWidth()-50, getHeight()/2), 75,
-                    new float[]{0f,1f}, new Color[]{new Color(230,170,100,45), new Color(230,170,100,0)});
-                g2.setPaint(gg); g2.fillOval(getWidth()-125,-20,150,getHeight()+40);
+                if (AppConfig.isDark()) {
+                    g2.setColor(new Color(12, 8, 16));
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                    // Rose glow left
+                    RadialGradientPaint rg = new RadialGradientPaint(new Point(70, getHeight()/2), 90,
+                        new float[]{0f,1f}, new Color[]{new Color(212,100,150,55), new Color(212,100,150,0)});
+                    g2.setPaint(rg); g2.fillOval(-20,-30,180,getHeight()+60);
+                    // Gold glow right
+                    RadialGradientPaint gg = new RadialGradientPaint(new Point(getWidth()-50, getHeight()/2), 75,
+                        new float[]{0f,1f}, new Color[]{new Color(230,170,100,45), new Color(230,170,100,0)});
+                    g2.setPaint(gg); g2.fillOval(getWidth()-125,-20,150,getHeight()+40);
+                } else {
+                    // Light mode: warm rose-cream gradient header
+                    GradientPaint lightBg = new GradientPaint(
+                        0,0, new Color(255,228,230),
+                        getWidth(),0, new Color(255,240,220));
+                    g2.setPaint(lightBg); g2.fillRect(0,0,getWidth(),getHeight());
+                    // Soft rose left glow
+                    RadialGradientPaint rg = new RadialGradientPaint(new Point(60, getHeight()/2), 80,
+                        new float[]{0f,1f}, new Color[]{new Color(200,80,120,60), new Color(200,80,120,0)});
+                    g2.setPaint(rg); g2.fillOval(-15,-20,160,getHeight()+40);
+                    // Gold right glow
+                    RadialGradientPaint gg = new RadialGradientPaint(new Point(getWidth()-40, getHeight()/2), 70,
+                        new float[]{0f,1f}, new Color[]{new Color(220,150,80,50), new Color(220,150,80,0)});
+                    g2.setPaint(gg); g2.fillOval(getWidth()-110,-15,140,getHeight()+30);
+                }
 
                 // Bottom border — rose gold gradient line
                 GradientPaint borderLine = new GradientPaint(
@@ -175,42 +189,21 @@ public class ChatBotGUI extends JFrame {
     }
 
     private JLabel buildRoseOrb() {
+        // Use the proper ORYN logo
+        java.awt.image.BufferedImage logo = ORYNIcon.generate(44);
         return new JLabel() {
             float p = 0f;
-            { new Timer(50, e -> { p += 0.06f; repaint(); }).start();
-              setPreferredSize(new Dimension(42, 42)); }
+            { new Timer(60, e -> { p += 0.05f; repaint(); }).start();
+              setPreferredSize(new Dimension(44, 44)); }
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Subtle pulse glow behind logo
                 float glow = (float)(0.5 + 0.5 * Math.sin(p));
-
-                // Outer pulse ring
-                g2.setColor(new Color(212, 100, 150, (int)(25 + 25*glow)));
-                g2.fillOval(0, 0, 42, 42);
-
-                // Glass orb — layered
-                RadialGradientPaint core = new RadialGradientPaint(
-                    new Point(21, 18), 16,
-                    new float[]{0f, 0.4f, 0.75f, 1f},
-                    new Color[]{
-                        new Color(255, 220, 235),
-                        new Color(220, 120, 160),
-                        new Color(160, 60, 100),
-                        new Color(80, 20, 50)
-                    });
-                g2.setPaint(core);
-                g2.fillOval(5, 5, 32, 32);
-
-                // Top shimmer
-                g2.setColor(new Color(255, 240, 248, (int)(60 + 40*glow)));
-                g2.fillOval(9, 8, 14, 8);
-
-                // Center symbol
-                g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
-                g2.setColor(new Color(255, 240, 248, 200));
-                FontMetrics fm = g2.getFontMetrics();
-                String s = "\u2736";
-                g2.drawString(s, 21 - fm.stringWidth(s)/2, 26);
+                g2.setColor(new Color(212, 100, 150, (int)(15 + 20*glow)));
+                g2.fillOval(-3, -3, 50, 50);
+                // Draw the logo
+                g2.drawImage(logo, 0, 0, 44, 44, null);
                 g2.dispose();
             }
         };

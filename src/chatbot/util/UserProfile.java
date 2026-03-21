@@ -14,7 +14,7 @@ public class UserProfile {
 
     public String  userName  = "";
     public boolean soundOn   = true;
-    public boolean darkMode  = true;
+    public boolean darkMode  = false;
     public int     fontSize  = 14;
 
     // ── Save ──────────────────────────────────────────────────────────────────

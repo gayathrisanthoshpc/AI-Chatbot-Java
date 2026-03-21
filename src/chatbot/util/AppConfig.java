@@ -15,30 +15,30 @@ public class AppConfig {
     public static final int WINDOW_WIDTH  = 640;
     public static final int WINDOW_HEIGHT = 800;
 
-    private static boolean darkMode = true;
+    private static boolean darkMode = false;
     public static boolean isDark()        { return darkMode; }
     public static void setDark(boolean d) { darkMode = d; }
 
     // ── Rose Noir Dark Palette ─────────────────────────────────────────────────
     // Background layers — very dark, warm-tinted
-    public static Color BG_DARK()        { return darkMode ? new Color(10, 8, 12)       : new Color(248, 244, 250); }
-    public static Color BG_PANEL()       { return darkMode ? new Color(16, 12, 20)      : new Color(240, 235, 245); }
-    public static Color BG_INPUT()       { return darkMode ? new Color(22, 16, 28)      : new Color(255, 252, 255); }
+    public static Color BG_DARK()        { return darkMode ? new Color(10, 8, 12)       : new Color(255, 248, 244); }
+    public static Color BG_PANEL()       { return darkMode ? new Color(16, 12, 20)      : new Color(252, 240, 238); }
+    public static Color BG_INPUT()       { return darkMode ? new Color(22, 16, 28)      : new Color(255, 252, 250); }
 
     // Glass bubble bases — semi-transparent feel
-    public static Color BG_BOT_BUBBLE()  { return darkMode ? new Color(30, 20, 38, 200) : new Color(240, 230, 248, 220); }
-    public static Color BG_USER_BUBBLE() { return darkMode ? new Color(80, 30, 50, 210) : new Color(200, 100, 130, 180); }
+    public static Color BG_BOT_BUBBLE()  { return darkMode ? new Color(30, 20, 38, 200) : new Color(235, 215, 228, 240); }
+    public static Color BG_USER_BUBBLE() { return darkMode ? new Color(80, 30, 50, 210) : new Color(195, 85, 120, 200); }
 
     // Glass border colors
     public static Color GLASS_BORDER_BOT()  { return darkMode ? new Color(180, 100, 140, 60) : new Color(180, 80, 120, 80); }
     public static Color GLASS_BORDER_USER() { return darkMode ? new Color(220, 140, 170, 80) : new Color(200, 80, 110, 100); }
 
     // Subtle background border
-    public static Color BORDER_SUBTLE()  { return darkMode ? new Color(60, 35, 70)     : new Color(210, 190, 220); }
+    public static Color BORDER_SUBTLE()  { return darkMode ? new Color(60, 35, 70)     : new Color(200, 165, 185); }
 
     // Text
-    public static Color TEXT_PRIMARY()   { return darkMode ? new Color(245, 235, 242)  : new Color(25, 15, 30);    }
-    public static Color TEXT_SECONDARY() { return darkMode ? new Color(160, 110, 140)  : new Color(130, 80, 110);  }
+    public static Color TEXT_PRIMARY()   { return darkMode ? new Color(245, 235, 242)  : new Color(35, 18, 28);    }
+    public static Color TEXT_SECONDARY() { return darkMode ? new Color(160, 110, 140)  : new Color(160, 90, 120);  }
     public static Color TEXT_USER()      { return darkMode ? new Color(255, 240, 245)  : new Color(255, 245, 248); }
 
     // ── Rose Gold Accent System ────────────────────────────────────────────────
