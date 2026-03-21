@@ -31,7 +31,7 @@ public class ORYNBubble extends JPanel {
     private static final int NAME_ROW_H = 20;
 
     // Font chain for proper emoji
-    private static final String[] FONT_NAMES = {"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Segoe UI"};
+    private static final String[] FONT_NAMES = {"Segoe UI Emoji","Segoe UI Symbol","Apple Color Emoji","Noto Color Emoji","Segoe UI"};
 
     public Message getMsg()               { return msg; }
     public void setHighlighted(boolean h) { this.highlighted = h; repaint(); }
@@ -52,28 +52,37 @@ public class ORYNBubble extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_RENDERING,          RenderingHints.VALUE_RENDER_QUALITY);
         g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,  RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        // ── Measure text ──────────────────────────────────────────────────────
-        List<List<Segment>> paragraphs = parseText(msg.getText());
+        // ── Measure text with proper word-wrap ───────────────────────────────
         Font baseFont = AppConfig.FONT_MESSAGE;
         Font boldFont = new Font(baseFont.getName(), Font.BOLD, baseFont.getSize());
         FontMetrics fmBase = g2.getFontMetrics(baseFont);
         int lineH  = fmBase.getHeight() + LINE_GAP;
         int ascent = fmBase.getAscent();
 
-        int contentW = 0;
-        for (List<Segment> para : paragraphs) {
-            contentW = Math.max(contentW, measureLine(g2, para, baseFont, boldFont));
+        // Word-wrap each paragraph into display lines
+        List<List<Segment>> rawParagraphs = parseText(msg.getText());
+        List<List<Segment>> wrappedLines  = new ArrayList<>();
+        int maxLineW = AppConfig.MAX_BUBBLE_WIDTH - PAD_H * 2;
+        for (List<Segment> para : rawParagraphs) {
+            wrappedLines.addAll(wordWrap(g2, para, baseFont, boldFont, maxLineW));
         }
-        contentW = Math.min(contentW, AppConfig.MAX_BUBBLE_WIDTH);
-        contentW = Math.max(contentW, 80);
+        if (wrappedLines.isEmpty()) wrappedLines.add(new ArrayList<>());
+
+        int contentW = 0;
+        for (List<Segment> line : wrappedLines) {
+            contentW = Math.max(contentW, measureLine(g2, line, baseFont, boldFont));
+        }
+        contentW = Math.min(contentW, AppConfig.MAX_BUBBLE_WIDTH - PAD_H * 2);
+        contentW = Math.max(contentW, 60);
 
         FontMetrics fmTime = g2.getFontMetrics(AppConfig.FONT_TIMESTAMP);
         int timeW   = fmTime.stringWidth(msg.getTimestamp());
         int bubbleW = Math.max(contentW, timeW + 20) + PAD_H * 2;
-        int bubbleH = paragraphs.size() * lineH + PAD_V * 2 + 6;
+        int bubbleH = wrappedLines.size() * lineH + PAD_V * 2 + 6;
         int totalH  = NAME_ROW_H + bubbleH + 6;
 
         setPreferredSize(new Dimension(bubbleW + 4, totalH));
+        List<List<Segment>> paragraphs = wrappedLines; // use wrapped lines for rendering
 
         int bx = isUser ? getWidth() - bubbleW - 2 : 2;
         int by = NAME_ROW_H;
@@ -234,6 +243,57 @@ public class ORYNBubble extends JPanel {
         return segs;
     }
 
+    /** Split a line of segments into multiple lines that fit within maxWidth */
+    private List<List<Segment>> wordWrap(Graphics2D g2, List<Segment> segs, Font base, Font bold, int maxWidth) {
+        List<List<Segment>> result = new ArrayList<>();
+        List<Segment> currentLine = new ArrayList<>();
+        int currentW = 0;
+
+        // Flatten all segments into words
+        List<Object[]> words = new ArrayList<>(); // [word_string, is_bold]
+        for (Segment seg : segs) {
+            String[] parts = seg.text().split("(?<=\\s)|(?=\\s)");
+            for (String part : parts) {
+                if (!part.isEmpty()) words.add(new Object[]{part, seg.bold()});
+            }
+        }
+
+        for (Object[] word : words) {
+            String wText = (String)word[0];
+            boolean isBold = (boolean)word[1];
+            Font f = isBold ? new Font(base.getName(), Font.BOLD, base.getSize()) : base;
+            int ww = measureSegmentWidth(g2, wText, f);
+
+            if (currentW + ww > maxWidth && !currentLine.isEmpty()) {
+                result.add(new ArrayList<>(currentLine));
+                currentLine.clear();
+                currentW = 0;
+                if (wText.equals(" ")) continue;
+            }
+            if (!currentLine.isEmpty() && currentLine.get(currentLine.size()-1).bold() == isBold) {
+                Segment last = currentLine.remove(currentLine.size()-1);
+                currentLine.add(new Segment(last.text() + wText, isBold));
+            } else {
+                currentLine.add(new Segment(wText, isBold));
+            }
+            currentW += ww;
+        }
+        if (!currentLine.isEmpty()) result.add(currentLine);
+        if (result.isEmpty()) result.add(new ArrayList<>());
+        return result;
+    }
+
+    private int measureSegmentWidth(Graphics2D g2, String text, Font f) {
+        int w = 0;
+        for (int ci = 0; ci < text.length(); ) {
+            int cp = text.codePointAt(ci);
+            String ch = new String(Character.toChars(cp));
+            w += g2.getFontMetrics(pickFont(cp, f)).stringWidth(ch);
+            ci += Character.charCount(cp);
+        }
+        return w;
+    }
+
     private int measureLine(Graphics2D g2, List<Segment> segs, Font base, Font bold) {
         int w = 0;
         for (Segment seg : segs) {
@@ -260,9 +320,17 @@ public class ORYNBubble extends JPanel {
     }
 
     private boolean isEmoji(int cp) {
-        return (cp >= 0x1F000 && cp <= 0x1FFFF) || (cp >= 0x2600 && cp <= 0x27BF)
-            || (cp >= 0xFE00 && cp <= 0xFE0F)   || (cp >= 0x2300 && cp <= 0x23FF)
-            || (cp >= 0x1F300 && cp <= 0x1F9FF);
+        return (cp >= 0x1F000 && cp <= 0x1FFFF)
+            || (cp >= 0x2600  && cp <= 0x27BF)
+            || (cp >= 0xFE00  && cp <= 0xFE0F)
+            || (cp >= 0x2300  && cp <= 0x23FF)
+            || (cp >= 0x1F300 && cp <= 0x1F9FF)
+            || (cp >= 0x1FA00 && cp <= 0x1FAFF)
+            || (cp >= 0x2000  && cp <= 0x20CF)
+            || (cp >= 0x2100  && cp <= 0x21FF)
+            || cp == 0x2764 || cp == 0x2B50 || cp == 0x2728
+            || cp == 0x2714 || cp == 0x274C || cp == 0x2705
+            || cp == 0x2757 || cp == 0x2753 || cp == 0x26A0;
     }
 
     @Override

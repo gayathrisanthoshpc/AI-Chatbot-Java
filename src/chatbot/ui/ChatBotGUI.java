@@ -349,10 +349,11 @@ public class ChatBotGUI extends JFrame {
         statusLabel.setForeground(new Color(AppConfig.ACCENT.getRed(), AppConfig.ACCENT.getGreen(),
                                             AppConfig.ACCENT.getBlue(), 140));
 
-        // Suggestion chips
+        // Suggestion chips - horizontal scroll to prevent overflow
         suggestionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
         suggestionBar.setOpaque(false);
         suggestionBar.setVisible(false);
+        suggestionBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JPanel inputRow = new JPanel(new BorderLayout(10, 0));
         inputRow.setOpaque(false);
@@ -365,8 +366,20 @@ public class ChatBotGUI extends JFrame {
         sendButton = new RoseButton();
         sendButton.addActionListener(e -> handleSend());
 
-        inputRow.add(glassInput, BorderLayout.CENTER);
-        inputRow.add(sendButton, BorderLayout.EAST);
+        VoiceInput voiceBtn = new VoiceInput(text -> {
+            SwingUtilities.invokeLater(() -> {
+                inputField.setText(text);
+                handleSend();
+            });
+        });
+
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        rightBtns.setOpaque(false);
+        rightBtns.add(voiceBtn);
+        rightBtns.add(sendButton);
+
+        inputRow.add(glassInput,  BorderLayout.CENTER);
+        inputRow.add(rightBtns,   BorderLayout.EAST);
 
         bottom.add(statusLabel,    BorderLayout.NORTH);
         bottom.add(suggestionBar,  BorderLayout.CENTER);
@@ -477,14 +490,21 @@ public class ChatBotGUI extends JFrame {
         chatPanel.revalidate(); chatPanel.repaint(); scrollToBottom();
 
         if (animate) {
+            // Slide + fade animation
+            boolean slideRight = msg.getSender() == Message.Sender.USER;
+            rowWrap.putClientProperty("slideX", slideRight ? 30 : -30);
+            rowWrap.putClientProperty("fadeAlpha", 0f);
             Timer ft = new Timer(16, null);
             ft.addActionListener(e -> {
-                alpha[0] = Math.min(1f, alpha[0] + 0.09f);
+                float a = (Float) rowWrap.getClientProperty("fadeAlpha");
+                int  sx = (Integer) rowWrap.getClientProperty("slideX");
+                a  = Math.min(1f, a + 0.1f);
+                sx = (int)(sx * 0.75f); // ease out
+                rowWrap.putClientProperty("fadeAlpha", a);
+                rowWrap.putClientProperty("slideX", sx);
                 rowWrap.repaint();
-                if (alpha[0] >= 1f) ft.stop();
+                if (a >= 1f) ft.stop();
             });
-            // Paint with alpha via client property
-            rowWrap.putClientProperty("fadeAlpha", alpha);
             ft.start();
         }
     }
@@ -591,7 +611,20 @@ public class ChatBotGUI extends JFrame {
         chatPanel.setBackground(AppConfig.BG_DARK());
         scrollPane.setBackground(AppConfig.BG_DARK());
         scrollPane.getViewport().setBackground(AppConfig.BG_DARK());
-        SwingUtilities.updateComponentTreeUI(this); repaint();
+        if (particleBg != null) particleBg.setBackground(AppConfig.BG_DARK());
+        // Repaint all components recursively
+        refreshComponent(getContentPane());
+        SwingUtilities.updateComponentTreeUI(this);
+        repaint(); revalidate();
+    }
+
+    private void refreshComponent(Component c) {
+        if (c instanceof ORYNBubble) { c.repaint(); return; }
+        if (c instanceof JPanel p) {
+            p.setBackground(new Color(0,0,0,0));
+            for (Component child : p.getComponents()) refreshComponent(child);
+        }
+        c.repaint();
     }
 
     private void toggleSearch() {

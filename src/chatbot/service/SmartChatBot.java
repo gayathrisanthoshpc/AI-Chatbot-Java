@@ -1,6 +1,8 @@
 package chatbot.service;
 
 import chatbot.intelligence.*;
+import chatbot.intelligence.MiniGames;
+import chatbot.intelligence.PersonalityEngine;
 import chatbot.util.UserProfile;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -58,6 +60,45 @@ public class SmartChatBot implements ChatService {
         // 1. Easter eggs (checked first — highest priority)
         String egg = EasterEggs.check(input);
         if (egg != null) return egg;
+
+        // 1b. Mini games — handle active game input
+        if (MiniGames.isPlaying()) {
+            String gameReply = MiniGames.handleInput(input);
+            if (gameReply != null) return PersonalityEngine.adapt(gameReply);
+        }
+
+        // 1c. Start mini games
+        if (matches(lower, "number game|guess (a )?number|play number")) {
+            lastTopic = "game"; return MiniGames.startNumberGame();
+        }
+        if (matches(lower, "word game|guess (a )?word|play word")) {
+            lastTopic = "game"; return MiniGames.startWordGame();
+        }
+        if (matches(lower, "^riddle|give me a riddle|tell me a riddle")) {
+            lastTopic = "riddle"; return MiniGames.startRiddle();
+        }
+
+        // 1d. Personality mode changes
+        if (matches(lower, "be formal|formal mode|switch to formal")) {
+            PersonalityEngine.setMode(PersonalityEngine.Mode.FORMAL);
+            return "\uD83D\uDC54 Switching to **Formal** mode. I shall communicate with appropriate decorum.";
+        }
+        if (matches(lower, "be casual|casual mode|switch to casual|be chill")) {
+            PersonalityEngine.setMode(PersonalityEngine.Mode.CASUAL);
+            return "\uD83D\uDE0E Switching to **Casual** mode. Cool, let's just chat normally!";
+        }
+        if (matches(lower, "be playful|playful mode|switch to playful|be fun|be funny")) {
+            PersonalityEngine.setMode(PersonalityEngine.Mode.PLAYFUL);
+            return "\uD83C\uDF89 Switching to **Playful** mode. Let's have some FUN! \uD83D\uDD25";
+        }
+        if (matches(lower, "default mode|normal mode|reset personality|reset mode")) {
+            PersonalityEngine.setMode(PersonalityEngine.Mode.DEFAULT);
+            return "\u2736 Back to **Default** mode. The classic ORYN experience!";
+        }
+        if (matches(lower, "what mode|current mode|which mode|personality")) {
+            return "I'm currently in **" + PersonalityEngine.getModeName() + "** mode " +
+                   PersonalityEngine.getModeEmoji() + "\nAvailable modes: default, formal, casual, playful";
+        }
 
         // 2. Mood detection
         MoodEngine.Mood detectedMood = mood.detect(lower);
@@ -301,7 +342,7 @@ public class SmartChatBot implements ChatService {
         String reply = getDefaultReply(lower);
         // Inject mood prefix if mood changed
         if (mood.shouldInjectPrefix()) reply = mood.getPrefix() + reply;
-        return reply;
+        return PersonalityEngine.adapt(reply);
     }
 
     /** Allow GUI to pre-set username from saved profile */
