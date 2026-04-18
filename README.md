@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✦ ORYN
+# ORYN
 ### *Light of Knowledge*
 
 <br>
@@ -25,9 +25,9 @@
 
 <div align="center">
 
-## 🌸 Rose Noir · Glassmorphism · Java Swing
+##  Rose Noir · Glassmorphism · Java Swing
 
-| 🎨 Beautiful UI | 🧠 Real Intelligence | 🎮 Fun Features |
+|  Beautiful UI |  Real Intelligence | Fun Features |
 |:---:|:---:|:---:|
 | Frosted glass bubbles | Mood detection | Mini games |
 | Rose gold animations | Bond system (6 levels) | Easter eggs |
@@ -39,35 +39,35 @@
 
 ---
 
-## ✨ What Makes ORYN Unique
+## What Makes ORYN Unique
 
 ORYN is not just another chatbot. It's a passion project exploring what a truly **personal, beautiful Java desktop application** can be.
 
-- 🤝 **Bond System** — relationship grows from *Stranger* → *Trusted Soul* over 300+ messages
-- 🎭 **Mood Engine** — detects happiness, frustration, curiosity, stress and adapts its tone
-- 🧩 **Long Memory** — remembers your name, interests and topics across sessions
-- 🌅 **Daily Digest** — personalised briefing every new day
-- 🥚 **Easter Eggs** — hidden commands that unlock secret ORYN experiences
-- 🎙️ **Voice Input** — speak to ORYN via Windows Speech Recognition
-- 🎯 **Focus Mode** — deep work assistant with task tracking
-- ⚖️ **Debate Mode** — argues both sides of any topic
+-  **Bond System** — relationship grows from *Stranger* → *Trusted Soul* over 300+ messages
+-  **Mood Engine** — detects happiness, frustration, curiosity, stress and adapts its tone
+-  **Long Memory** — remembers your name, interests and topics across sessions
+-  **Daily Digest** — personalised briefing every new day
+-  **Easter Eggs** — hidden commands that unlock secret ORYN experiences
+-  **Voice Input** — speak to ORYN via Windows Speech Recognition
+-  **Focus Mode** — deep work assistant with task tracking
+-  **Debate Mode** — argues both sides of any topic
 
 ---
 
-## 🌐 Free APIs — No Key Required
+##  Free APIs — No Key Required
 
 | API | Feature |
 |---|---|
-| `wttr.in` | 🌤 Live weather by city |
-| `opentdb.com` | 🧠 Trivia with answer checking |
-| `en.wikipedia.org/api` | 📖 Summaries on any topic |
-| `quotable.io` | 💬 Inspirational quotes |
-| `official-joke-api` | 😄 Random jokes |
-| `numbersapi.com` | 🔢 Fun number facts |
+| `wttr.in` | Live weather by city |
+| `opentdb.com` |  Trivia with answer checking |
+| `en.wikipedia.org/api` |  Summaries on any topic |
+| `quotable.io` | Inspirational quotes |
+| `official-joke-api` |  Random jokes |
+| `numbersapi.com` |  Fun number facts |
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Java 17 or higher
@@ -93,7 +93,7 @@ java -cp out chatbot.ChatBot
 
 ---
 
-## 💬 Commands
+##  Commands
 
 | Say this | What happens |
 |---|---|
@@ -112,7 +112,7 @@ java -cp out chatbot.ChatBot
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 ```
 src/chatbot/
 ├── intelligence/          ← The brain
@@ -139,7 +139,7 @@ src/chatbot/
 
 ---
 
-## 🛠️ Built With
+##  Built With
 
 **100% pure Java — zero external libraries**
 
@@ -147,7 +147,7 @@ src/chatbot/
 
 ---
 
-## 🌱 Roadmap
+## Roadmap
 
 - [ ] Image drop and analysis
 - [ ] Multi-language support  
@@ -159,6 +159,6 @@ src/chatbot/
 
 *"Knowledge is the light that never dims."*
 
-**— ORYN ✦**
+**— ORYN **
 
 </div>
